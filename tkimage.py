@@ -20,7 +20,7 @@ class ExampleApp(tk.Tk):
         self._draw_image()
 
     def _draw_image(self):
-        self.im = Image.open('1.jpg')
+        self.im = Image.open('map.png')
         self.tk_im = ImageTk.PhotoImage(self.im)
         self.canvas.create_image(0, 0, anchor="nw", image=self.tk_im)
 
@@ -46,4 +46,3 @@ class ExampleApp(tk.Tk):
 if __name__ == "__main__":
     app = ExampleApp()
     app.mainloop()
-x
