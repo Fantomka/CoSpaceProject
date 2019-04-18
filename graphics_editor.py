@@ -5,6 +5,8 @@ TODO: Фрейм с картой на фоне, для прорисовки ог
 from tkinter import *
 from PIL import Image, ImageTk
 
+MAP_PATH = 'map.png'
+
 
 class Editor(Frame):
     def __init__(self, master=None):  # img_path='map.png'
@@ -25,7 +27,7 @@ class Editor(Frame):
         self._draw_image()
 
     def _draw_image(self):
-        self.im = Image.open('map.png')
+        self.im = Image.open(MAP_PATH)
         self.tk_im = ImageTk.PhotoImage(self.im)
         self.canvas.create_image(0, 0, anchor="nw", image=self.tk_im)
 

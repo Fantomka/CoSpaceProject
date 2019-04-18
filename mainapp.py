@@ -12,14 +12,13 @@ from tkinter import *
 
 class MainApp(Tk):
     """
-    Класс программы (приложения), который используется для созддания графа потоков
+    Класс программы (приложения)
     """
-    def __init__(self, title="CoSpaceProject", ico_path="icon.ico", map_path="map.png"):
+    def __init__(self, title="CoSpaceProject", ico_path="icon.ico"):
         """
         инициализация окна и фреймов, наследованных из классов tkinter, panel и graphics_editor
         :param title: имя программы
         :param ico_path: путь до иконки
-        :param map_path: путь до карты
         """
         Tk.__init__(self)
         self.title = title

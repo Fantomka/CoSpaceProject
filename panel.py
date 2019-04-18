@@ -26,7 +26,7 @@ FLOW_POINT_DELETE = 6
 # FLOW_ROUTE_
 
 List_env = ['Environment ' + str(i) for i in range(4)]
-CONF_PATH = "configuration.csv"
+CONF_PATH = "configuration.txt"
 
 
 class Panel(Frame):
@@ -75,3 +75,4 @@ class Panel(Frame):
                 f.write("\ntest")
         else:
             f = open(CONF_PATH, 'w')
+            
