@@ -7,17 +7,17 @@ from PIL import Image, ImageTk
 
 
 class Editor(Frame):
-    def __init__(self, master=None, img_path='map.png', bg="white"):
-        Frame.__init__(self, master=master, bg=bg)
-        self.img_path = img_path
+    def __init__(self, master=None):  # img_path='map.png'
+        Frame.__init__(self, master=master)
+        #  self.img_path = img_path
 
-        self.x = self.y = IntVar()
+        self.x = self.y = 0
         self.start_x = None
         self.start_y = None
         self.rect = None
 
-        self.canvas = Canvas(self, cursor="cross")
-        self.canvas.pack(side="left")
+        self.canvas = Canvas(self, width=360*2, height=270*2, cursor="cross")
+        self.canvas.place(width=360*2, height=270*2)
         self.canvas.bind("<ButtonPress-1>", self.on_button_press)
         self.canvas.bind("<B1-Motion>", self.on_move_press)
         self.canvas.bind("<ButtonRelease-1>", self.on_button_release)
@@ -25,7 +25,7 @@ class Editor(Frame):
         self._draw_image()
 
     def _draw_image(self):
-        self.im = Image.open(self.img_path)
+        self.im = Image.open('map.png')
         self.tk_im = ImageTk.PhotoImage(self.im)
         self.canvas.create_image(0, 0, anchor="nw", image=self.tk_im)
 
@@ -42,6 +42,11 @@ class Editor(Frame):
 
         # изменение размеров прямоугольника в соответствии с движением курсора
         self.canvas.coords(self.rect, self.start_x, self.start_y, curX, curY)
+        return curX, curY
 
     def on_button_release(self, event):
+        pass
+
+    # TODO: выгрузить вектор для отображения на панели
+    def get_vector(self):
         pass

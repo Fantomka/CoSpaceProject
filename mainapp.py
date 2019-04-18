@@ -3,7 +3,6 @@
 В нем будет собран конфигуратор, для редактирования графа потоков движения робота
 Данные на экспорт будут заносится в файл data.py
 Приложение упаковывает в себе два фрейма, описанные в классах panel.py и graphics_editor.py
-TODO: Создать файл configuration.csv и осуществить выгрузку данных в него
 """
 
 from panel import Panel
@@ -26,13 +25,11 @@ class MainApp(Tk):
         self.title = title
         self.iconbitmap = ico_path
 
-        self.resizable(True, True)
-        self.geometry("900x600+300+200")
+        self.resizable(False, False)
+        self.geometry("855x540+300+200")
 
-        self.__panel = Panel(self, bg="black", width=10)
-        self.__editor = Editor(self, map_path, bg="black")
+        self.editor = Editor(self)
+        self.panel = Panel(self, bg="black")
 
-        self.__editor.pack(side="left", fill="both")
-        self.__panel.pack(side="right", fill="y")
-
-
+        self.editor.place(width=360*2, height=270*2)
+        self.panel.place(width=120, height=540, relx=0.85)
