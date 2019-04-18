@@ -26,15 +26,15 @@ FLOW_POINT_DELETE = 6
 # FLOW_ROUTE_
 
 List_env = ['Environment ' + str(i) for i in range(4)]
-CONF_PATH = "configuration.csv"
+CONF_PATH = "./configuration.csv"
 
 
 class Panel(Frame):
     """
     Панель инструментов (размещается по горизонтали, лучше сверху
     """
-    def __init__(self, master=None, width=200, bg="white"):
-        Frame.__init__(self, master=master, width=width, bg=bg)
+    def __init__(self, master=None, width=200):
+        Frame.__init__(self, master=master, width=width)
 
         # Инициализация кнопок панеля редактора
         # TODO: доделать листбокс
@@ -73,7 +73,7 @@ class Panel(Frame):
     def export_data(self, event):
         if not os.path.exists(CONF_PATH):
             with open(CONF_PATH, "w+") as f:
-                pass
+                f.write("test")
         else:
             with open(CONF_PATH, "w+") as f:
                 pass

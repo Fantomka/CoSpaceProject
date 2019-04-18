@@ -29,8 +29,8 @@ class MainApp(Tk):
         self.resizable(True, True)
         self.geometry("900x600+300+200")
 
-        self.__panel = Panel(self, bg="black", width=10)
-        self.__editor = Editor(self, map_path, bg="black")
+        self.__panel = Panel(self, width=1)
+        self.__editor = Editor(self, map_path)
 
         self.__editor.pack(side="left", fill="both")
         self.__panel.pack(side="right", fill="y")

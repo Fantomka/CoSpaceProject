@@ -7,16 +7,15 @@ from PIL import Image, ImageTk
 
 
 class Editor(Frame):
-    def __init__(self, master=None, img_path='map.png', bg="white"):
-        Frame.__init__(self, master=master, bg=bg)
+    def __init__(self, master=None, img_path='map.png'):
+        Frame.__init__(self, master=master)
         self.img_path = img_path
-
         self.x = self.y = IntVar()
         self.start_x = None
         self.start_y = None
         self.rect = None
 
-        self.canvas = Canvas(self, cursor="cross")
+        self.canvas = Canvas(self, width=360, height=270, cursor="cross")
         self.canvas.pack(side="left")
         self.canvas.bind("<ButtonPress-1>", self.on_button_press)
         self.canvas.bind("<B1-Motion>", self.on_move_press)
@@ -25,8 +24,9 @@ class Editor(Frame):
         self._draw_image()
 
     def _draw_image(self):
-        self.im = Image.open(self.img_path)
-        self.tk_im = ImageTk.PhotoImage(self.im)
+        self.image = Image.open(self.img_path)
+        self.image = self.image.resize((360, 270))
+        self.tk_im = ImageTk.PhotoImage(self.image)
         self.canvas.create_image(0, 0, anchor="nw", image=self.tk_im)
 
     def on_button_press(self, event):
