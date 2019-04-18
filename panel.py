@@ -75,4 +75,3 @@ class Panel(Frame):
                 f.write("\ntest")
         else:
             f = open(CONF_PATH, 'w')
-            
