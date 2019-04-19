@@ -5,18 +5,21 @@ TODO: Фрейм с картой на фоне, для прорисовки ог
 from tkinter import *
 from PIL import Image, ImageTk
 
+MAP_PATH = 'map.png'
+
 
 class Editor(Frame):
-    def __init__(self, master=None, img_path='map.png'):
+    def __init__(self, master=None):  # img_path='map.png'
         Frame.__init__(self, master=master)
-        self.img_path = img_path
-        self.x = self.y = IntVar()
+        #  self.img_path = img_path
+
+        self.x = self.y = 0
         self.start_x = None
         self.start_y = None
         self.rect = None
 
-        self.canvas = Canvas(self, width=360, height=270, cursor="cross")
-        self.canvas.pack(side="left")
+        self.canvas = Canvas(self, width=360*2, height=270*2, cursor="cross")
+        self.canvas.place(width=360*2, height=270*2)
         self.canvas.bind("<ButtonPress-1>", self.on_button_press)
         self.canvas.bind("<B1-Motion>", self.on_move_press)
         self.canvas.bind("<ButtonRelease-1>", self.on_button_release)
@@ -24,9 +27,8 @@ class Editor(Frame):
         self._draw_image()
 
     def _draw_image(self):
-        self.image = Image.open(self.img_path)
-        self.image = self.image.resize((360, 270))
-        self.tk_im = ImageTk.PhotoImage(self.image)
+        self.im = Image.open(MAP_PATH)
+        self.tk_im = ImageTk.PhotoImage(self.im)
         self.canvas.create_image(0, 0, anchor="nw", image=self.tk_im)
 
     def on_button_press(self, event):
@@ -42,6 +44,11 @@ class Editor(Frame):
 
         # изменение размеров прямоугольника в соответствии с движением курсора
         self.canvas.coords(self.rect, self.start_x, self.start_y, curX, curY)
+        return curX, curY
 
     def on_button_release(self, event):
+        pass
+
+    # TODO: выгрузить вектор для отображения на панели
+    def get_vector(self):
         pass
