@@ -21,8 +21,8 @@ class MainApp(Tk):
         :param ico_path: путь до иконки
         """
         Tk.__init__(self)
-        self.title = title
-        self.iconbitmap = ico_path
+        self.title(title)
+        self.iconbitmap(ico_path)
 
         self.resizable(False, False)
         self.geometry("855x540+300+200")

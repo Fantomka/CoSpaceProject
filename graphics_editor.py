@@ -9,9 +9,8 @@ MAP_PATH = 'map.png'
 
 
 class Editor(Frame):
-    def __init__(self, master=None):  # img_path='map.png'
+    def __init__(self, master=None):
         Frame.__init__(self, master=master)
-        #  self.img_path = img_path
 
         self.x = self.y = 0
         self.start_x = None
@@ -28,6 +27,7 @@ class Editor(Frame):
 
     def _draw_image(self):
         self.im = Image.open(MAP_PATH)
+        self.im = self.im.resize((360*2, 270*2))
         self.tk_im = ImageTk.PhotoImage(self.im)
         self.canvas.create_image(0, 0, anchor="nw", image=self.tk_im)
 
