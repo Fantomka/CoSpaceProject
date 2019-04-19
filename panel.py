@@ -33,16 +33,16 @@ class Panel(Frame):
     """
     Панель инструментов (размещается по горизонтали, лучше сверху
     """
-    def __init__(self, master=None, width=200, bg="white", vector=(0, 0)):
+    def __init__(self, master=None, width=200, bg="white"):
         Frame.__init__(self, master=master, width=width, bg=bg)
 
         # Инициализация кнопок панеля редактора
         self.env = StringVar(value='Environment 0')
         self.__opEnvironments = OptionMenu(self, self.env, *List_env)
 
-        # TODO: строка с координатами
-        self.__vector = Label(self, text=f" x- {vector[0]}, y - {vector[1]}")
-        self.__vector.bind()
+        # TODO: исправить баг с выводом координат самого поля
+        self.__vector = Label(self, text=f'x - 0, y - 0')
+        self.__vector.bind("<Motion>", self.on_move)
 
         self.__rBtnPressed = IntVar()
         self.__rButton1 = Radiobutton(self, text=f"Area -> new        ", variable=self.__rBtnPressed, value=AREA_NEW)
@@ -75,3 +75,6 @@ class Panel(Frame):
                 f.write("\ntest")
         else:
             f = open(CONF_PATH, 'w')
+
+    def on_move(self, event):
+        self.__vector.configure(text=f'x - {event.x}, y - {event.y}')

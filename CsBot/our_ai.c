@@ -578,8 +578,8 @@ void Game1()
     switch(CurAction)
     {
         case 1:
-            WheelLeft=4;
-            WheelRight=4;
+            WheelLeft=0;
+            WheelRight=0;
             LED_1=0;
             MyState=0;
             break;
@@ -612,4 +612,3 @@ DLL_EXPORT void OnTimer()
             break;
     }
 }
-

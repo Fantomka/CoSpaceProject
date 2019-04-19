@@ -5,7 +5,7 @@ TODO: Фрейм с картой на фоне, для прорисовки ог
 from tkinter import *
 from PIL import Image, ImageTk
 
-MAP_PATH = 'map.png'
+MAP_PATH = '1.png'
 
 
 class Editor(Frame):
@@ -47,8 +47,4 @@ class Editor(Frame):
         return curX, curY
 
     def on_button_release(self, event):
-        pass
-
-    # TODO: выгрузить вектор для отображения на панели
-    def get_vector(self):
         pass
