@@ -22,7 +22,6 @@ class Editor(Frame):
         self.canvas.bind("<ButtonPress-1>", self.on_button_press)
         self.canvas.bind("<B1-Motion>", self.on_move_press)
         self.canvas.bind("<ButtonRelease-1>", self.on_button_release)
-
         self._draw_image()
 
     def _draw_image(self):
@@ -41,7 +40,6 @@ class Editor(Frame):
 
     def on_move_press(self, event):
         curX, curY = (event.x, event.y)
-
         # изменение размеров прямоугольника в соответствии с движением курсора
         self.canvas.coords(self.rect, self.start_x, self.start_y, curX, curY)
         return curX, curY

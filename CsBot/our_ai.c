@@ -17,12 +17,81 @@
 #include <windows.h>
 #include <stdio.h>
 #include <math.h>
+
 #define DLL_EXPORT extern __declspec(dllexport)
+
 #define false 0
 #define true 1
-#endif//The robot ID : It must be two char, such as '00','kl' or 'Cr'.
+#endif
+
+typedef int bool;
+
+//The robot ID : It must be two char, such as '00','kl' or 'Cr'.
 char AI_MyID[2] = {'0','2'};
 
+#======TYPES===========
+
+typedef struct{
+    double x, y;
+}Coord;
+
+Coord new_coord(double x, double y){
+    Coord c;
+    c.x = x;
+    v.y = y;
+    return c;
+}
+
+// прямоугольник (зона)
+typedef struct{
+    int x1, y1, x2, y2;
+}Rectangle;
+
+// контрольные точки, по которым двигается робот
+typedef struct{
+    Rectangle p;
+    int time_set;
+}CheckPoint;
+
+CheckPoint new_checkpoint(Rectangle p, int time_set){
+    CheckPoint.p = p;
+    CheckPoint.time_set = time_set;
+    return p;
+}
+
+typedef struct{
+    int count;
+    CheckPoint CheckPoint[10];
+}CheckPoint;
+
+// прямоугольник ограничения движения (изменение пути)
+typedef struct{
+    Rectangle p;
+    int degree;
+}RectConstraint;
+
+RectConstraint new_RectConstraint(int x1, int y1, int x2, int y2, int degree){
+    RectConstraint p;
+    p.x1 = min(x1, x2);
+    p.y1 = min(y1, y2);
+    p.x2 = max(x1, x2);
+    p.y2 = max(y1, y2);
+    p.degree = degree;
+    return p;
+}
+
+typedef struct{
+    int count;
+    RectConstraint RectConstraint[10];
+}RectConstraint;
+
+typedef struct{
+    CheckPoint checkPoints[20];
+    int checkPointsCount;
+    RectConstraint rectConstraints[20];
+}Environment;
+
+#======variables======
 int Duration = 0;
 int SuperDuration = 0;
 int bGameEnd = false;
@@ -61,20 +130,17 @@ int justdeposited = 0;
 
 #define CsBot_AI_C//DO NOT delete this line
 
-DLL_EXPORT void SetGameID(int GameID)
-{
+DLL_EXPORT void SetGameID(int GameID){
     CurGame = GameID;
     bGameEnd = 0;
 }
 
-DLL_EXPORT int GetGameID()
-{
+DLL_EXPORT int GetGameID(){
     return CurGame;
 }
 
 //Only Used by CsBot Dance Platform
-DLL_EXPORT int IsGameEnd()
-{
+DLL_EXPORT int IsGameEnd(){
     return bGameEnd;
 }
 
@@ -87,8 +153,7 @@ DLL_EXPORT char* GetDebugInfo()
     return info;
 }
  
-DLL_EXPORT char* GetTeamName()
-{
+DLL_EXPORT char* GetTeamName(){
      return " ";
 }
 
@@ -149,6 +214,29 @@ DLL_EXPORT void GetCommand(int *AI_OUT)
     AI_OUT[2] = LED_1;
     AI_OUT[3] = MyState;
 }
+DLL_EXPORT void OnTimer()
+{
+    switch (CurGame)
+    {
+        case 9:
+            break;
+        case 10:
+            WheelLeft=0;
+            WheelRight=0;
+            LED_1=0;
+            MyState=0;
+            break;
+        case 0:
+            Game0();
+            break;
+        case 1:
+            Game1();
+            break;
+        default:
+            break;
+    }
+}
+
 void Game0() {
 
     if (SuperDuration > 0) {
@@ -207,9 +295,7 @@ void Game0() {
               ||
               (CSRight_R >= 200 && CSRight_R <= 255 && CSRight_G >= 20 && CSRight_G <= 50 && CSRight_B >= 20 &&
                CSRight_B <= 50))
-
              ||
-
              //cyan//
              ((CSLeft_R >= 15 && CSLeft_R <= 50 && CSLeft_G >= 220 && CSLeft_G <= 255 && CSLeft_B >= 220 &&
                CSLeft_B <= 255)
@@ -218,15 +304,11 @@ void Game0() {
                CSRight_B <= 255))
 
              ||
-
-
              //black//
              ((CSLeft_R >= 14 && CSLeft_R <= 40 && CSLeft_G >= 14 && CSLeft_G <= 40 && CSLeft_B >= 14 && CSLeft_B <= 40)
               ||
               (CSRight_R >= 14 && CSRight_R <= 40 && CSRight_G >= 14 && CSRight_G <= 40 && CSRight_B >= 14 &&
                CSRight_B <= 40)))
-
-
             &&
             (LoadedObjects < 6)
             ) {
@@ -357,8 +439,6 @@ void Game0() {
                 WheelRight = -2;
 
             }
-
-
             break;
         case 9:
             WheelLeft = 0;
@@ -656,28 +736,4 @@ void Game2()
             break;
     }
 
-}
-
-
-DLL_EXPORT void OnTimer()
-{
-    switch (CurGame)
-    {
-        case 9:
-            break;
-        case 10:
-            WheelLeft=0;
-            WheelRight=0;
-            LED_1=0;
-            MyState=0;
-            break;
-        case 0:
-            Game0();
-            break;
-        case 1:
-            Game1();
-            break;
-        default:
-            break;
-    }
 }
