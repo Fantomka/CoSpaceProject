@@ -62,7 +62,7 @@ CheckPoint new_checkpoint(Rectangle p, int time_set){
 typedef struct{
     int count;
     CheckPoint CheckPoint[10];
-}CheckPoint;
+}CheckPoints;
 
 // прямоугольник ограничения движения (изменение пути)
 typedef struct{
