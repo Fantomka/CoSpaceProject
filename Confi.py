@@ -3,13 +3,10 @@ import tkinter.ttk
 from PIL import Image, ImageTk
 import os
 
-AREA_NEW = 1
-AREA_DELETE = 2
-WALL_ADD = 3
-WALL_REMOVE = 4
-FLOW_POINT_NEW = 5
-FLOW_POINT_DELETE = 6
-CONF_PATH = "./configuration.csv"
+CHECKPOINT_NEW = 1
+CHECKPOINT_DELETE = 2
+CONSTRAINT_NEW = 3
+CONSTRAINT_DELETE = 4
 List_env = ['Environment ' + str(i) for i in range(4)]
 CONF_PATH = "configuration.txt"
 MAP_PATH = '1.png'
@@ -23,22 +20,25 @@ class CustomMenu(tkinter.Frame):
         root.iconbitmap("icon.ico")
         root.geometry("855x540+300+200")
         root.resizable(False, False)
-        root.config(background ="#373A68")
+        root.config(background="#373A68")
 
-        self.first_frame= Frame(root, bg = "#A3A3D7")
+        self.first_frame = Frame(root, bg="#A3A3D7")
         self.first_frame.place(width=360*2, height=270*2)
         self.x = self.y = 0
         self.canvas = Canvas(self.first_frame, width=360*2, height=270*2, cursor="cross")
-        self.canvas.place(width = 360*2, height = 270*2)
+        self.canvas.place(width=360*2, height=270*2)
         self.canvas.bind("<ButtonPress-1>", self.on_button_press)
         self.canvas.bind("<B1-Motion>", self.on_move_press)
         self.canvas.bind("<ButtonRelease-1>", self.on_button_release)
         self.canvas.bind("<Motion>", self.on_move)
+
         self.rect = None
         self.start_x = None
         self.start_y = None
-        self._draw_image()
+        self.checkpoints = []
+        self.constraints = []
 
+        self._draw_image()
         self.second_frame = Frame(root, bg="#FFFFFF")
         self.second_frame.place(width=131, height=540, relx=0.845)
 
@@ -48,14 +48,9 @@ class CustomMenu(tkinter.Frame):
         self.vector = Label(self.second_frame, text=f'x - 0, y - 0')
 
         self.__rBtnPressed = IntVar()
-        self.__rButton1 = Radiobutton(self.second_frame, text=f"Area -> new        ", variable=self.__rBtnPressed, value=AREA_NEW)
-        self.__rButton2 = Radiobutton(self.second_frame, text=f"Area -> delete     ", variable=self.__rBtnPressed, value=AREA_DELETE)
-        self.__rButton3 = Radiobutton(self.second_frame, text=f"Wall -> add        ", variable=self.__rBtnPressed, value=WALL_ADD)
-        self.__rButton4 = Radiobutton(self.second_frame, text=f"Wall -> remove     ", variable=self.__rBtnPressed, value=WALL_REMOVE)
-        self.__rButton5 = Radiobutton(self.second_frame, text=f"FlowPoint -> new   ", variable=self.__rBtnPressed,
-                                      value=FLOW_POINT_NEW)
-        self.__rButton6 = Radiobutton(self.second_frame, text=f"FlowPoint -> delete", variable=self.__rBtnPressed,
-                                      value=FLOW_POINT_DELETE)
+        self.__rButton1 = Radiobutton(self.second_frame, text=f"CheckPoint -> new   ", variable=self.__rBtnPressed, value=CHECKPOINT_NEW)
+        self.__rButton2 = Radiobutton(self.second_frame, text=f"Constraint -> new   ", variable=self.__rBtnPressed, value=CONSTRAINT_NEW)
+        self.__rButton3 = Radiobutton(self.second_frame, text=f"Last Rect -> redraw", variable=self.__rBtnPressed, value=CONSTRAINT_DELETE)
 
         self.__ExportBtn = Button(self.second_frame, text="Export", width=4, height=2)
         self.__ExportBtn.bind("<Button-1>", self.export_data)
@@ -68,14 +63,19 @@ class CustomMenu(tkinter.Frame):
         self.__rButton1.pack(side="top", fill="both")
         self.__rButton2.pack(side="top", fill="both")
         self.__rButton3.pack(side="top", fill="both")
-        self.__rButton4.pack(side="top", fill="both")
-        self.__rButton5.pack(side="top", fill="both")
-        self.__rButton6.pack(side="top", fill="both")
         self.__ExportBtn.pack(side="bottom", fill="both")
 
     def on_button_release(self, event):
         print(f'x1 - {self.start_x//2+1} y1 - {270-self.start_y//2}\n x2 - {event.x//2+1}, y2 - {270-event.y//2}')
-        pass
+        if self.__rBtnPressed.get() == CHECKPOINT_NEW:
+            self.checkpoints.append([self.start_x//2+1, 270-self.start_y//2, event.x//2+1, 270-event.y//2])
+        elif self.__rBtnPressed.get() == CHECKPOINT_DELETE and len(self.checkpoints) != 0:
+            self.checkpoints.pop()
+        elif self.__rBtnPressed.get() == CONSTRAINT_NEW:
+            self.constraints.append([self.start_x//2+1, 270-self.start_y//2, event.x//2+1, 270-event.y//2])
+        elif self.__rBtnPressed.get() == CONSTRAINT_DELETE and len(self.constraints) !=  0:
+            self.constraints.pop()
+        print(self.checkpoints, self.constraints)
 
     def export_data(self, event):
         if os.path.exists(CONF_PATH):
@@ -94,9 +94,10 @@ class CustomMenu(tkinter.Frame):
         """Сохраняет координаты нажатия ЛКМ"""
         self.start_x = event.x
         self.start_y = event.y
-
-        if not self.rect:
-            self.rect = self.canvas.create_rectangle(self.x, self.y, 1, 1)
+        if self.__rBtnPressed.get() == CHECKPOINT_NEW:
+            self.rect = self.canvas.create_rectangle(self.x, self.y, 1, 1, outline='green')
+        elif self.__rBtnPressed.get() == CONSTRAINT_NEW:
+            self.rect = self.canvas.create_rectangle(self.x, self.y, 1, 1, outline='red')
 
     def on_move_press(self, event):
         """изменение размеров прямоугольника в соответствии с движением курсора"""
