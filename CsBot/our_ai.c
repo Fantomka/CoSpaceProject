@@ -13,85 +13,79 @@
 /////////////////////////////////////
 
 #define CsBot_AI_H//DO NOT delete this line
+
 #ifndef CSBOT_REAL
 #include <windows.h>
-#include <stdio.h>
-#include <math.h>
-
 #define DLL_EXPORT extern __declspec(dllexport)
-
 #define false 0
 #define true 1
 #endif
 
+#include <stdio.h>
+#include <math.h>
 typedef int bool;
 
 //The robot ID : It must be two char, such as '00','kl' or 'Cr'.
 char AI_MyID[2] = {'0','2'};
 
-#======TYPES===========
+//======TYPES===========
 
 typedef struct{
     double x, y;
 }Coord;
 
 Coord new_coord(double x, double y){
-    Coord c;
-    c.x = x;
+    Coord v;
+    v.x = x;
     v.y = y;
-    return c;
+    return v;
 }
-
-// прямоугольник (зона)
-typedef struct{
-    int x1, y1, x2, y2;
-}Rectangle;
 
 // контрольные точки, по которым двигается робот
 typedef struct{
-    Rectangle p;
+    int x1;
+    int y1;
+    int x2;
+    int y2;
     int time_set;
 }CheckPoint;
 
-CheckPoint new_checkpoint(Rectangle p, int time_set){
-    CheckPoint.p = p;
-    CheckPoint.time_set = time_set;
-    return p;
+CheckPoint new_checkpoint(int x1, int y1, int x2, int y2, int time_set){
+    CheckPoint v;
+    v.x1 = min(x1, x2);
+    v.y1 = min(y1, y2);
+    v.x2 = max(x1, x2);
+    v.y2 = max(y1, y2);
+    v.time_set = time_set;
+    return v;
 }
-
-typedef struct{
-    int count;
-    CheckPoint CheckPoint[10];
-}CheckPoints;
 
 // прямоугольник ограничения движения (изменение пути)
 typedef struct{
-    Rectangle p;
+    int x1;
+    int y1;
+    int x2;
+    int y2;
     int degree;
-}RectConstraint;
+}Constraint;
 
-RectConstraint new_RectConstraint(int x1, int y1, int x2, int y2, int degree){
-    RectConstraint p;
-    p.x1 = min(x1, x2);
-    p.y1 = min(y1, y2);
-    p.x2 = max(x1, x2);
-    p.y2 = max(y1, y2);
-    p.degree = degree;
-    return p;
+Constraint new_constraint(int x1, int y1, int x2, int y2, int degree){
+    Constraint v;
+    v.x1 = min(x1, x2);
+    v.y1 = min(y1, y2);
+    v.x2 = max(x1, x2);
+    v.y2 = max(y1, y2);
+    v.degree = degree;
+    return v;
 }
-
-typedef struct{
-    int count;
-    RectConstraint RectConstraint[10];
-}RectConstraint;
 
 typedef struct{
     CheckPoint checkPoints[20];
     int checkPointsCount;
-    RectConstraint rectConstraints[20];
+    Constraint Constraints[20];
 }Environment;
 
-#======variables======
+//======variables======
 int Duration = 0;
 int SuperDuration = 0;
 int bGameEnd = false;
@@ -213,28 +207,6 @@ DLL_EXPORT void GetCommand(int *AI_OUT)
     AI_OUT[1] = WheelRight;
     AI_OUT[2] = LED_1;
     AI_OUT[3] = MyState;
-}
-DLL_EXPORT void OnTimer()
-{
-    switch (CurGame)
-    {
-        case 9:
-            break;
-        case 10:
-            WheelLeft=0;
-            WheelRight=0;
-            LED_1=0;
-            MyState=0;
-            break;
-        case 0:
-            Game0();
-            break;
-        case 1:
-            Game1();
-            break;
-        default:
-            break;
-    }
 }
 
 void Game0() {
@@ -735,5 +707,28 @@ void Game2()
         default:
             break;
     }
-
 }
+
+DLL_EXPORT void OnTimer()
+{
+    switch (CurGame)
+    {
+        case 9:
+            break;
+        case 10:
+            WheelLeft=0;
+            WheelRight=0;
+            LED_1=0;
+            MyState=0;
+            break;
+        case 0:
+            Game0();
+            break;
+        case 1:
+            Game1();
+            break;
+        default:
+            break;
+    }
+}
+

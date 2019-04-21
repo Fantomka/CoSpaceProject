@@ -13,18 +13,19 @@ CONF_PATH = "./configuration.csv"
 List_env = ['Environment ' + str(i) for i in range(4)]
 CONF_PATH = "configuration.txt"
 MAP_PATH = '1.png'
+
+
 class CustomMenu(tkinter.Frame):
     def __init__(self, parent):
         tkinter.Frame.__init__(self, parent)
         self.parent = parent
-        root_window.title('CoSpaceProject')
-        root_window.iconbitmap("icon.ico")
-        root_window.geometry("855x540+300+200")
-        root_window.resizable(False, False)
-        root_window.config(background ="#373A68" )
+        root.title('CoSpaceProject')
+        root.iconbitmap("icon.ico")
+        root.geometry("855x540+300+200")
+        root.resizable(False, False)
+        root.config(background ="#373A68")
 
-
-        self.first_frame= Frame(root_window, bg = "#A3A3D7")
+        self.first_frame= Frame(root, bg = "#A3A3D7")
         self.first_frame.place(width=360*2, height=270*2)
         self.x = self.y = 0
         self.canvas = Canvas(self.first_frame, width=360*2, height=270*2, cursor="cross")
@@ -38,7 +39,7 @@ class CustomMenu(tkinter.Frame):
         self.start_y = None
         self._draw_image()
 
-        self.second_frame = Frame(root_window, bg="#FFFFFF")
+        self.second_frame = Frame(root, bg="#FFFFFF")
         self.second_frame.place(width=131, height=540, relx=0.845)
 
         self.env = StringVar(value='Environment 0')
@@ -72,27 +73,8 @@ class CustomMenu(tkinter.Frame):
         self.__rButton6.pack(side="top", fill="both")
         self.__ExportBtn.pack(side="bottom", fill="both")
 
-    def _draw_image(self):
-        self.image = Image.open("map.png")
-        self.image = self.image.resize((360*2, 270*2))
-        self.tk_im = ImageTk.PhotoImage(self.image)
-        self.canvas.create_image(0, 0, anchor="nw", image=self.tk_im)
-    def on_button_press(self, event):
-        # save mouse drag start position
-        self.start_x = event.x
-        self.start_y = event.y
-
-        #one rectangle
-        if not self.rect:
-            self.rect = self.canvas.create_rectangle(self.x, self.y, 1, 1, )
-
-    def on_move_press(self, event):
-        curX, curY = (event.x, event.y)
-
-        # expand rectangle as you drag the mouse
-        self.canvas.coords(self.rect, self.start_x, self.start_y, curX, curY)
-
     def on_button_release(self, event):
+        print(f'x1 - {self.start_x//2+1} y1 - {270-self.start_y//2}\n x2 - {event.x//2+1}, y2 - {270-event.y//2}')
         pass
 
     def export_data(self, event):
@@ -117,28 +99,17 @@ class CustomMenu(tkinter.Frame):
             self.rect = self.canvas.create_rectangle(self.x, self.y, 1, 1)
 
     def on_move_press(self, event):
-        curX, curY = (event.x, event.y)
-
-        # изменение размеров прямоугольника в соответствии с движением курсора
-        self.canvas.coords(self.rect, self.start_x, self.start_y, curX, curY)
-        return curX, curY
+        """изменение размеров прямоугольника в соответствии с движением курсора"""
+        self.canvas.coords(self.rect, self.start_x, self.start_y, event.x, event.y)
 
     def on_move(self, event):
-
-        self.vector.configure(text=f'x - {int(event.x/2)+1}, y - {int(270-event.y/2)}')
-
-    def on_button_release(self, event):
-        pass
+        self.vector.configure(text=f'x - {int(event.x//2)+1}, y - {int(270-event.y//2)}')
 
     def select_env(self):
         pass
 
 
-
-
-
 if __name__ == '__main__':
-
-   root_window = tkinter.Tk()
-   run = CustomMenu(root_window)
-   root_window.mainloop()
+    root = tkinter.Tk()
+    run = CustomMenu(root)
+    root.mainloop()
