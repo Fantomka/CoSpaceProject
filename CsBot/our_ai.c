@@ -209,6 +209,23 @@ DLL_EXPORT void GetCommand(int *AI_OUT)
     AI_OUT[3] = MyState;
 }
 
+rotation(int car_x, int car_y, int dot_x, int dot_y)
+{
+
+	int corner = 0;
+	if (car_x>dot_x)
+		if (car_y>dot_y)
+			corner = acos(abs(car_y - dot_y)/sqrt((car_y - dot_y)*(car_y - dot_y)+(car_x-dot_x)*(car_x-dot_x)))*180/M_PI +90;
+		else
+			corner = acos(abs(car_y - dot_y)/sqrt((car_y - dot_y)*(car_y - dot_y)+(car_x-dot_x)*(car_x-dot_x)))*180/M_PI;
+	else
+		if (car_y>dot_y)
+			corner = asin(abs(car_y - dot_y)/sqrt((car_y - dot_y)*(car_y - dot_y)+(car_x-dot_x)*(car_x-dot_x)))*180/M_PI + 180;
+		else
+			corner = asin(abs(car_y - dot_y)/sqrt((car_y - dot_y)*(car_y - dot_y)+(car_x-dot_x)*(car_x-dot_x)))*180/M_PI + 270;
+	return corner;
+}
+
 void Game0() {
 
     if (SuperDuration > 0) {
@@ -613,7 +630,8 @@ void Game0() {
 
 void Game1()
 {
-
+    int pos_x =  51;
+    int pos_y = 21;
     if(SuperDuration>0)
     {
         SuperDuration--;
@@ -621,6 +639,11 @@ void Game1()
     else if(Duration>0)
     {
         Duration--;
+    }
+    else if (Compass < rotation(PositionX, PositionY, pos_x, pos_y)-10 || Compass > rotation(PositionX, PositionY, pos_x, pos_y)+10 )
+    {
+        Duration = 0;
+        CurAction =2;
     }
     else if(true)
     {
@@ -630,11 +653,28 @@ void Game1()
     switch(CurAction)
     {
         case 1:
-            WheelLeft=0;
-            WheelRight=0;
+            WheelLeft=2;
+            WheelRight=2;
             LED_1=0;
             MyState=0;
             break;
+        case 2:
+            if (Compass < rotation(PositionX, PositionY, pos_x, pos_y)-10)
+            {
+                WheelLeft=-1;
+                WheelRight=1;
+                LED_1= 0;
+                MyState= 0;
+                break;
+            }
+            else
+            {
+                WheelLeft= 1;
+                WheelRight= -1;
+                LED_1= 0;
+                MyState= 0;
+                break;
+            }
         default:
             break;
     }
