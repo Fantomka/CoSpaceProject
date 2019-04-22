@@ -4,7 +4,7 @@ TODO: Фрейм с картой на фоне, для прорисовки ог
 
 from tkinter import *
 from PIL import Image, ImageTk
-
+import panel
 MAP_PATH = '1.png'
 
 
@@ -16,11 +16,13 @@ class Editor(Frame):
         self.start_x = None
         self.start_y = None
         self.rect = None
-
+        self.EVENT_FRAME_X = 0
+        self.EVENT_FRAME_Y = 0
         self.canvas = Canvas(self, width=360*2, height=270*2, cursor="cross")
         self.canvas.place(width=360*2, height=270*2)
         self.canvas.bind("<ButtonPress-1>", self.on_button_press)
         self.canvas.bind("<B1-Motion>", self.on_move_press)
+        self.canvas.bind("<Motion>", self.on_move)
         self.canvas.bind("<ButtonRelease-1>", self.on_button_release)
         self._draw_image()
 
@@ -43,6 +45,11 @@ class Editor(Frame):
         # изменение размеров прямоугольника в соответствии с движением курсора
         self.canvas.coords(self.rect, self.start_x, self.start_y, curX, curY)
         return curX, curY
+
+    def on_move(self, event):
+        #print(self.EVENT_FRAME_Y)
+        self.EVENT_FRAME_X = event.x
+        self.EVENT_FRAME_Y = event.y
 
     def on_button_release(self, event):
         pass
