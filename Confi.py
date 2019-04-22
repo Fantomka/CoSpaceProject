@@ -65,18 +65,6 @@ class CustomMenu(tkinter.Frame):
 
         self.__ExportBtn.pack(side="bottom", fill="both")
 
-    def export_data(self, event):
-        if os.path.exists(CONF_PATH):
-            with open(CONF_PATH, "w") as f:
-                for stroke in self.checkpoints:
-                    f.write(f"\n_checkpoints({stroke[0]}, {stroke[1]}, {stroke[2]}, {stroke[3]});")
-                f.write("\n")
-                for stroke in self.constraints:
-                    f.write(f"\n_constraints({stroke[0]}, {stroke[1]}, {stroke[2]}, {stroke[3]});")
-            f.close()
-        else:
-            f = open(CONF_PATH, 'w')
-
     def _draw_image(self):
         self.im = Image.open(MAP_PATH)
         self.im = self.im.resize((360*2, 270*2))
@@ -122,8 +110,18 @@ class CustomMenu(tkinter.Frame):
     def on_move(self, event):
         self.vector.configure(text=f'x - {int(event.x//2)+1}, y - {int(270-event.y//2)}')
 
-    def select_env(self):
-        pass
+    def export_data(self, event):
+        if os.path.exists(CONF_PATH):
+            with open(CONF_PATH, "w") as f:
+                for stroke in self.checkpoints:
+                    f.write(f"\n_checkpoints({stroke[0]}, {stroke[1]}, {stroke[2]}, {stroke[3]}, {stroke[4]}, {stroke[5]});")
+                f.write("\n")
+                for stroke in self.constraints:
+                    f.write(f"\n_constraints({stroke[0]}, {stroke[1]}, {stroke[2]}, {stroke[3]}, {stroke[4]}, {stroke[5]});")
+            f.close()
+        else:
+            f = open(CONF_PATH, 'w')
+
 
 
 if __name__ == '__main__':
