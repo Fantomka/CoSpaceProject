@@ -4,9 +4,10 @@ from PIL import Image, ImageTk
 import os
 
 CHECKPOINT_NEW = 1
-CHECKPOINT_DELETE = 2
+LAST_CHECKPOINT_REDRAW = 2
 CONSTRAINT_NEW = 3
-CONSTRAINT_DELETE = 4
+LAST_CONSTRAINT_REDRAW = 4
+
 List_env = ['Environment ' + str(i) for i in range(4)]
 CONF_PATH = "configuration.txt"
 MAP_PATH = '1.png'
@@ -42,45 +43,36 @@ class CustomMenu(tkinter.Frame):
         self.second_frame = Frame(root, bg="#FFFFFF")
         self.second_frame.place(width=131, height=540, relx=0.845)
 
-        self.env = StringVar(value='Environment 0')
-        self.__opEnvironments = OptionMenu(self.second_frame, self.env, *List_env)
-
         self.vector = Label(self.second_frame, text=f'x - 0, y - 0')
 
         self.__rBtnPressed = IntVar()
-        self.__rButton1 = Radiobutton(self.second_frame, text=f"CheckPoint -> new   ", variable=self.__rBtnPressed, value=CHECKPOINT_NEW)
-        self.__rButton2 = Radiobutton(self.second_frame, text=f"Constraint -> new   ", variable=self.__rBtnPressed, value=CONSTRAINT_NEW)
-        self.__rButton3 = Radiobutton(self.second_frame, text=f"Last Rect -> redraw", variable=self.__rBtnPressed, value=CONSTRAINT_DELETE)
+        self.__rButton1 = Radiobutton(self.second_frame, text=f"CheckPoint -> new     ", variable=self.__rBtnPressed, value=CHECKPOINT_NEW)
+        self.__rButton2 = Radiobutton(self.second_frame, text=f"Last Checkpoint redraw", variable=self.__rBtnPressed, value=LAST_CHECKPOINT_REDRAW)
+        self.__rButton3 = Radiobutton(self.second_frame, text=f"Constraint  -> new    ", variable=self.__rBtnPressed, value=CONSTRAINT_NEW)
+        self.__rButton4 = Radiobutton(self.second_frame, text=f"Last Constraint redraw", variable=self.__rBtnPressed, value=LAST_CONSTRAINT_REDRAW)
 
         self.__ExportBtn = Button(self.second_frame, text="Export", width=4, height=2)
         self.__ExportBtn.bind("<Button-1>", self.export_data)
 
         # Упаковка кнопок
-        self.__opEnvironments.pack(side="top", fill="both")
-
         self.vector.pack(side="top", fill="both")
 
         self.__rButton1.pack(side="top", fill="both")
         self.__rButton2.pack(side="top", fill="both")
         self.__rButton3.pack(side="top", fill="both")
-        self.__ExportBtn.pack(side="bottom", fill="both")
+        self.__rButton4.pack(side="top", fill="both")
 
-    def on_button_release(self, event):
-        print(f'x1 - {self.start_x//2+1} y1 - {270-self.start_y//2}\n x2 - {event.x//2+1}, y2 - {270-event.y//2}')
-        if self.__rBtnPressed.get() == CHECKPOINT_NEW:
-            self.checkpoints.append([self.start_x//2+1, 270-self.start_y//2, event.x//2+1, 270-event.y//2])
-        elif self.__rBtnPressed.get() == CHECKPOINT_DELETE and len(self.checkpoints) != 0:
-            self.checkpoints.pop()
-        elif self.__rBtnPressed.get() == CONSTRAINT_NEW:
-            self.constraints.append([self.start_x//2+1, 270-self.start_y//2, event.x//2+1, 270-event.y//2])
-        elif self.__rBtnPressed.get() == CONSTRAINT_DELETE and len(self.constraints) !=  0:
-            self.constraints.pop()
-        print(self.checkpoints, self.constraints)
+        self.__ExportBtn.pack(side="bottom", fill="both")
 
     def export_data(self, event):
         if os.path.exists(CONF_PATH):
-            with open(CONF_PATH, "a") as f:
-                f.write("\ntest")
+            with open(CONF_PATH, "w") as f:
+                for stroke in self.checkpoints:
+                    f.write(f"\n_checkpoints({stroke[0]}, {stroke[1]}, {stroke[2]}, {stroke[3]});")
+                f.write("\n")
+                for stroke in self.constraints:
+                    f.write(f"\n_constraints({stroke[0]}, {stroke[1]}, {stroke[2]}, {stroke[3]});")
+            f.close()
         else:
             f = open(CONF_PATH, 'w')
 
@@ -95,13 +87,29 @@ class CustomMenu(tkinter.Frame):
         self.start_x = event.x
         self.start_y = event.y
         if self.__rBtnPressed.get() == CHECKPOINT_NEW:
-            self.rect = self.canvas.create_rectangle(self.x, self.y, 1, 1, outline='green')
+            self.rect = self.canvas.create_rectangle(self.x, self.y, 1, 1, outline='green', tag='cp')
         elif self.__rBtnPressed.get() == CONSTRAINT_NEW:
-            self.rect = self.canvas.create_rectangle(self.x, self.y, 1, 1, outline='red')
+            self.rect = self.canvas.create_rectangle(self.x, self.y, 1, 1, outline='red', tag='ct')
 
     def on_move_press(self, event):
         """изменение размеров прямоугольника в соответствии с движением курсора"""
         self.canvas.coords(self.rect, self.start_x, self.start_y, event.x, event.y)
+
+    def on_button_release(self, event):
+        print(
+            f'x1 - {self.start_x // 2 + 1} y1 - {270 - self.start_y // 2}\n x2 - {event.x // 2 + 1}, y2 - {270 - event.y // 2}')
+        if self.__rBtnPressed.get() == CHECKPOINT_NEW:
+            self.checkpoints.append([self.start_x // 2 + 1, 270 - self.start_y // 2, event.x // 2 + 1, 270 - event.y // 2])
+            # TODO self.vector = self.canvas.create_line()
+        elif self.__rBtnPressed.get() == LAST_CHECKPOINT_REDRAW:
+            self.checkpoints.pop()
+            self.checkpoints.append([self.start_x // 2 + 1, 270 - self.start_y // 2, event.x // 2 + 1, 270 - event.y // 2])
+        elif self.__rBtnPressed.get() == CONSTRAINT_NEW:
+            self.constraints.append([self.start_x // 2 + 1, 270 - self.start_y // 2, event.x // 2 + 1, 270 - event.y // 2])
+        elif self.__rBtnPressed.get() == LAST_CONSTRAINT_REDRAW:
+            self.constraints.pop()
+            self.constraints.append([self.start_x // 2 + 1, 270 - self.start_y // 2, event.x // 2 + 1, 270 - event.y // 2])
+        print(self.checkpoints, self.constraints)
 
     def on_move(self, event):
         self.vector.configure(text=f'x - {int(event.x//2)+1}, y - {int(270-event.y//2)}')
