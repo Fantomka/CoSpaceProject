@@ -631,7 +631,12 @@ void Game0() {
 void Game1()
 {
     Coord pos;
-    pos = new_coord(51, 21);
+    pos = new_coord(163, 239);
+    //124 181 171 221
+    int rectlnx =118;
+    int rectlny = 218;
+    int rectpvx = 210;
+    int rectpvy = 261;
     if(SuperDuration>0)
     {
         SuperDuration--;
@@ -639,6 +644,16 @@ void Game1()
     else if(Duration>0)
     {
         Duration--;
+    }
+    else if (PositionX == 0)
+    {
+        Duration = 0;
+        CurAction = 1;
+    }
+    else if (PositionX < rectpvx && PositionX > rectlnx && PositionY < rectpvy && PositionY > rectlny)
+    {
+        Duration = 0;
+        CurAction = 1;
     }
     else if (Compass < rotation(PositionX, PositionY, pos.x, pos.y)-10 || Compass > rotation(PositionX, PositionY, pos.x, pos.y)+10 )
     {
@@ -675,6 +690,11 @@ void Game1()
                 MyState= 0;
                 break;
             }
+         //case 3:
+           // {
+
+            //}
+
         default:
             break;
     }
