@@ -14,7 +14,7 @@ TODO: Фрейм панели и его данные и функционал. + 
 
 from tkinter import *
 import os
-
+import graphics_editor
 AREA_NEW = 1
 AREA_DELETE = 2
 WALL_ADD = 3
@@ -33,17 +33,15 @@ class Panel(Frame):
     """
     Панель инструментов (размещается по горизонтали, лучше сверху
     """
+
     def __init__(self, master=None, width=200, bg="white"):
         Frame.__init__(self, master=master, width=width, bg=bg)
-
         # Инициализация кнопок панеля редактора
         self.env = StringVar(value='Environment 0')
         self.__opEnvironments = OptionMenu(self, self.env, *List_env)
-
         # TODO: исправить баг с выводом координат самого поля
-        self.__vector = Label(self, text=f'x - 0, y - 0')
-        self.__vector.bind("<Motion>", self.on_move)
-
+        self.vector = Label(self, text=f'x - 0, y - 0')
+        self.vector.bind("<Motion>", self.on_move)
         self.__rBtnPressed = IntVar()
         self.__rButton1 = Radiobutton(self, text=f"Area -> new        ", variable=self.__rBtnPressed, value=AREA_NEW)
         self.__rButton2 = Radiobutton(self, text=f"Area -> delete     ", variable=self.__rBtnPressed, value=AREA_DELETE)
@@ -58,7 +56,7 @@ class Panel(Frame):
         # Упаковка кнопок
         self.__opEnvironments.pack(side="top", fill="both")
 
-        self.__vector.pack(side="top", fill="both")
+        self.vector.pack(side="top", fill="both")
 
         self.__rButton1.pack(side="top", fill="both")
         self.__rButton2.pack(side="top", fill="both")
@@ -77,4 +75,8 @@ class Panel(Frame):
             f = open(CONF_PATH, 'w')
 
     def on_move(self, event):
-        self.__vector.configure(text=f'x - {event.x}, y - {event.y}')
+        self.graph = graphics_editor.Editor()
+        print(self.graph.EVENT_FRAME_Y)
+        event.x = self.graph.EVENT_FRAME_X
+        event.y = self.graph.EVENT_FRAME_Y
+        self.vector.configure(text=f'x - {event.x}, y - {event.y}')
