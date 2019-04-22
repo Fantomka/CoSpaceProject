@@ -71,8 +71,13 @@ class CustomMenu(tkinter.Frame):
 
     def export_data(self, event):
         if os.path.exists(CONF_PATH):
-            with open(CONF_PATH, "a") as f:
-                f.write("\ntest")
+            with open(CONF_PATH, "w") as f:
+                for stroke in self.checkpoints:
+                    f.write(f"\n_checkpoints({stroke[0]}, {stroke[1]}, {stroke[2]}, {stroke[3]});")
+                f.write("\n")
+                for stroke in self.constraints:
+                    f.write(f"\n_constraints({stroke[0]}, {stroke[1]}, {stroke[2]}, {stroke[3]});")
+            f.close()
         else:
             f = open(CONF_PATH, 'w')
 
