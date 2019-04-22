@@ -31,10 +31,10 @@ char AI_MyID[2] = {'0','2'};
 //======TYPES===========
 
 typedef struct{
-    double x, y;
+    int x, y;
 }Coord;
 
-Coord new_coord(double x, double y){
+Coord new_Coord(int x, int y){
     Coord v;
     v.x = x;
     v.y = y;
@@ -43,47 +43,53 @@ Coord new_coord(double x, double y){
 
 // контрольные точки, по которым двигается робот
 typedef struct{
-    int x1;
-    int y1;
-    int x2;
-    int y2;
-    int time_set;
+    Coord p1;
+    Coord p2;
+    Coord center;
 }CheckPoint;
 
-CheckPoint new_checkpoint(int x1, int y1, int x2, int y2, int time_set){
+CheckPoint new_Checkpoint(Coord p1, Coord p2, Coord center){
     CheckPoint v;
-    v.x1 = min(x1, x2);
-    v.y1 = min(y1, y2);
-    v.x2 = max(x1, x2);
-    v.y2 = max(y1, y2);
-    v.time_set = time_set;
+    v.p1 = p1;
+    v.p2 = p2;
+    v.center = center;
     return v;
+}
+
+#define CHECKPOINTS_COUNT 10
+CheckPoint CHECKPOINTS[CHECKPOINTS_COUNT];
+
+int checkpoint_count = 0;
+
+void _checkpoint(int x1, int y1, int x2, int y2, int center_x, int center_y){
+    CHECKPOINTS[checkpoint_count++] = new_Checkpoint(new_Coord(x1, y1), new_Coord(x2, y2), new_Coord(center_x, center_y));
 }
 
 // прямоугольник ограничения движения (изменение пути)
 typedef struct{
-    int x1;
-    int y1;
-    int x2;
-    int y2;
+    Coord p1;
+    Coord p2;
+    Coord center;
     int degree;
 }Constraint;
 
-Constraint new_constraint(int x1, int y1, int x2, int y2, int degree){
+Constraint new_Constraint(Coord p1, Coord p2, Coord center, int degree){
     Constraint v;
-    v.x1 = min(x1, x2);
-    v.y1 = min(y1, y2);
-    v.x2 = max(x1, x2);
-    v.y2 = max(y1, y2);
+    v.p1 = p1;
+    v.p2 = p2;
+    v.center = center;
     v.degree = degree;
     return v;
 }
 
-typedef struct{
-    CheckPoint checkPoints[20];
-    int checkPointsCount;
-    Constraint Constraints[20];
-}Environment;
+#define CONSTRAINTS_COUNT 10
+Constraint CONSTRAINTS[CONSTRAINTS_COUNT];
+
+int constraint_count = 0;
+
+void _constraint(int x1, int y1, int x2, int y2, int center_x, int center_y, int degree){
+    CONSTRAINTS[constraint_count++] = new_Constraint(new_Coord(x1, y1), new_Coord(x2, y2), new_Coord(center_x, center_y), degree);
+}
 
 //======variables======
 int Duration = 0;
@@ -631,7 +637,7 @@ void Game0() {
 void Game1()
 {
     Coord pos;
-    pos = new_coord(51, 21);
+    pos = new_Coord(51, 21);
     if(SuperDuration>0)
     {
         SuperDuration--;
