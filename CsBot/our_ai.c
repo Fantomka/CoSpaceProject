@@ -630,8 +630,8 @@ void Game0() {
 
 void Game1()
 {
-    int pos_x =  51;
-    int pos_y = 21;
+    Coord pos;
+    pos = new_coord(51, 21);
     if(SuperDuration>0)
     {
         SuperDuration--;
@@ -640,7 +640,7 @@ void Game1()
     {
         Duration--;
     }
-    else if (Compass < rotation(PositionX, PositionY, pos_x, pos_y)-10 || Compass > rotation(PositionX, PositionY, pos_x, pos_y)+10 )
+    else if (Compass < rotation(PositionX, PositionY, pos.x, pos.y)-10 || Compass > rotation(PositionX, PositionY, pos.x, pos.y)+10 )
     {
         Duration = 0;
         CurAction =2;
@@ -659,7 +659,7 @@ void Game1()
             MyState=0;
             break;
         case 2:
-            if (Compass < rotation(PositionX, PositionY, pos_x, pos_y)-10)
+            if (Compass < rotation(PositionX, PositionY, pos.x, pos.y)-10)
             {
                 WheelLeft=-1;
                 WheelRight=1;

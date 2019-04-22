@@ -43,9 +43,6 @@ class CustomMenu(tkinter.Frame):
         self.second_frame = Frame(root, bg="#FFFFFF")
         self.second_frame.place(width=131, height=540, relx=0.845)
 
-        self.env = StringVar(value='Environment 0')
-        self.__opEnvironments = OptionMenu(self.second_frame, self.env, *List_env)
-
         self.vector = Label(self.second_frame, text=f'x - 0, y - 0')
 
         self.__rBtnPressed = IntVar()
@@ -58,8 +55,6 @@ class CustomMenu(tkinter.Frame):
         self.__ExportBtn.bind("<Button-1>", self.export_data)
 
         # Упаковка кнопок
-        self.__opEnvironments.pack(side="top", fill="both")
-
         self.vector.pack(side="top", fill="both")
 
         self.__rButton1.pack(side="top", fill="both")
@@ -104,19 +99,16 @@ class CustomMenu(tkinter.Frame):
         print(
             f'x1 - {self.start_x // 2 + 1} y1 - {270 - self.start_y // 2}\n x2 - {event.x // 2 + 1}, y2 - {270 - event.y // 2}')
         if self.__rBtnPressed.get() == CHECKPOINT_NEW:
-            self.checkpoints.append(
-                [self.start_x // 2 + 1, 270 - self.start_y // 2, event.x // 2 + 1, 270 - event.y // 2])
+            self.checkpoints.append([self.start_x // 2 + 1, 270 - self.start_y // 2, event.x // 2 + 1, 270 - event.y // 2])
+            # TODO self.vector = self.canvas.create_line()
         elif self.__rBtnPressed.get() == LAST_CHECKPOINT_REDRAW:
             self.checkpoints.pop()
-            self.checkpoints.append(
-                [self.start_x // 2 + 1, 270 - self.start_y // 2, event.x // 2 + 1, 270 - event.y // 2])
+            self.checkpoints.append([self.start_x // 2 + 1, 270 - self.start_y // 2, event.x // 2 + 1, 270 - event.y // 2])
         elif self.__rBtnPressed.get() == CONSTRAINT_NEW:
-            self.constraints.append(
-                [self.start_x // 2 + 1, 270 - self.start_y // 2, event.x // 2 + 1, 270 - event.y // 2])
+            self.constraints.append([self.start_x // 2 + 1, 270 - self.start_y // 2, event.x // 2 + 1, 270 - event.y // 2])
         elif self.__rBtnPressed.get() == LAST_CONSTRAINT_REDRAW:
             self.constraints.pop()
-            self.constraints.append(
-                [self.start_x // 2 + 1, 270 - self.start_y // 2, event.x // 2 + 1, 270 - event.y // 2])
+            self.constraints.append([self.start_x // 2 + 1, 270 - self.start_y // 2, event.x // 2 + 1, 270 - event.y // 2])
         print(self.checkpoints, self.constraints)
 
     def on_move(self, event):
