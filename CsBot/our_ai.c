@@ -91,6 +91,12 @@ void _constraint(int x1, int y1, int x2, int y2, int center_x, int center_y, int
     CONSTRAINTS[constraint_count++] = new_Constraint(new_Coord(x1, y1), new_Coord(x2, y2), new_Coord(center_x, center_y), degree);
 }
 
+void _init_data(){
+    // данные из конфигуратора
+
+
+}
+
 //======variables======
 int Duration = 0;
 int SuperDuration = 0;

@@ -2,6 +2,7 @@ from tkinter import *
 import tkinter.ttk
 from PIL import Image, ImageTk
 import os
+import math as m
 
 CHECKPOINT_NEW = 1
 LAST_CHECKPOINT_REDRAW = 2
@@ -30,9 +31,9 @@ class CustomMenu(tkinter.Frame):
         self.canvas.place(width=360*2, height=270*2)
         self.canvas.bind("<ButtonPress-1>", self.on_button_press)
         self.canvas.bind("<B1-Motion>", self.on_move_press)
-        # self.canvas.bind("<B1-Motion>", self.on_move)
         self.canvas.bind("<ButtonRelease-1>", self.on_button_release)
         self.canvas.bind("<Motion>", self.on_move)
+        self.canvas.bind("<Button-3>", self.set_angle)
 
         self.rect = None
         self.start_x = None
@@ -92,8 +93,6 @@ class CustomMenu(tkinter.Frame):
         y2 = 270 - event.y // 2
         center_x = (x2 + x1) // 2
         center_y = (y1 + y2) // 2
-
-        print(f'x1 - {x1} y1 - {y1} x2 - {x2}, y2 - {y2}, center_x - {center_x}, center_y - {center_y}')
         if self.__rBtnPressed.get() == CHECKPOINT_NEW:
             self.checkpoints.append([x1, y1, x2, y2, center_x, center_y])
             # TODO self.vector = self.canvas.create_line()
@@ -114,14 +113,44 @@ class CustomMenu(tkinter.Frame):
         if os.path.exists(CONF_PATH):
             with open(CONF_PATH, "w") as f:
                 for stroke in self.checkpoints:
-                    f.write(f"\n_checkpoints({stroke[0]}, {stroke[1]}, {stroke[2]}, {stroke[3]}, {stroke[4]}, {stroke[5]});")
+                    f.write("\n_checkpoint(")
+                    for i in range(len(stroke)):
+                        if i != len(stroke) - 1:
+                            f.write(str(stroke[i]) + ', ')
+                        else:
+                            f.write(str(stroke[i]) + ');')
                 f.write("\n")
                 for stroke in self.constraints:
-                    f.write(f"\n_constraints({stroke[0]}, {stroke[1]}, {stroke[2]}, {stroke[3]}, {stroke[4]}, {stroke[5]});")
-            f.close()
+                    f.write("\n_constraint(")
+                    for i in range(len(stroke)):
+                        if i != len(stroke) - 1:
+                            f.write(str(stroke[i]) + ', ')
+                        else:
+                            f.write(str(stroke[i]) + ');')
         else:
             f = open(CONF_PATH, 'w')
 
+    def set_angle(self, event):
+        print('test')
+        if self.__rBtnPressed.get() == CONSTRAINT_NEW:
+
+            center_x = self.constraints[-1][4]
+            center_y = self.constraints[-1][5]
+            dot_x = event.x // 2 + 1
+            dot_y = 270 - event.y // 2
+            print(center_x, center_y, dot_x, dot_y)
+            if center_x > dot_x:
+                if center_y > dot_y:
+                    angle = m.asin(abs(center_y - dot_y)/m.sqrt((center_y - dot_y) ** 2 + (center_x - dot_x) ** 2)) * 180/m.pi + 90
+                else:
+                    angle = m.acos(abs(center_y - dot_y)/m.sqrt((center_y - dot_y) ** 2 + (center_x - dot_x) ** 2)) * 180/m.pi
+            else:
+                if center_y > dot_y:
+                    angle = m.acos(abs(center_y - dot_y)/m.sqrt((center_y - dot_y) ** 2 + (center_x - dot_x) ** 2)) * 180/m.pi + 180
+                else:
+                    angle = m.asin(abs(center_y - dot_y)/m.sqrt((center_y - dot_y) ** 2 + (center_x - dot_x) ** 2)) * 180/m.pi + 270
+            self.constraints[-1].append(int(angle))
+            print(self.constraints)
 
 
 if __name__ == '__main__':
