@@ -221,21 +221,21 @@ DLL_EXPORT void GetCommand(int *AI_OUT)
     AI_OUT[3] = MyState;
 }
 
-rotation(int car_x, int car_y, int dot_x, int dot_y)
+rotation(Coord car, Coord dot)
 {
 
-	int corner = 0;
-	if (car_x>dot_x)
-		if (car_y>dot_y)
-			corner = acos(abs(car_y - dot_y)/sqrt((car_y - dot_y)*(car_y - dot_y)+(car_x-dot_x)*(car_x-dot_x)))*180/M_PI +90;
+	int angle = 0;
+	if (car.x>dot.x)
+		if (car.y>dot.y)
+			angle = acos(abs(car.y - dot.y)/sqrt((car.y - dot.y)*(car.y - dot.y)+(car.x-dot.x)*(car.x-dot.x)))*180/M_PI +90;
 		else
-			corner = acos(abs(car_y - dot_y)/sqrt((car_y - dot_y)*(car_y - dot_y)+(car_x-dot_x)*(car_x-dot_x)))*180/M_PI;
+			angle = acos(abs(car.y - dot.y)/sqrt((car.y - dot.y)*(car.y - dot.y)+(car.x-dot.x)*(car.x-dot.x)))*180/M_PI;
 	else
-		if (car_y>dot_y)
-			corner = asin(abs(car_y - dot_y)/sqrt((car_y - dot_y)*(car_y - dot_y)+(car_x-dot_x)*(car_x-dot_x)))*180/M_PI + 180;
+		if (car.y>dot.y)
+			angle = asin(abs(car.y - dot.y)/sqrt((car.y - dot.y)*(car.y - dot.y)+(car.x-dot.x)*(car.x-dot.x)))*180/M_PI + 180;
 		else
-			corner = asin(abs(car_y - dot_y)/sqrt((car_y - dot_y)*(car_y - dot_y)+(car_x-dot_x)*(car_x-dot_x)))*180/M_PI + 270;
-	return corner;
+			angle = asin(abs(car.y - dot.y)/sqrt((car.y - dot.y)*(car.y - dot.y)+(car.x-dot.x)*(car.x-dot.x)))*180/M_PI + 270;
+	return angle;
 }
 
 void Game0() {
