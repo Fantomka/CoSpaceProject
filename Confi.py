@@ -45,7 +45,7 @@ class CustomMenu(tkinter.Frame):
         self.second_frame = Frame(root, bg="#FFFFFF")
         self.second_frame.place(width=131, height=540, relx=0.845)
 
-        self.vector = Label(self.second_frame, text=f'x - 0, y - 0')
+        self.coords = Label(self.second_frame, text=f'x - 0, y - 0')
 
         self.__rBtnPressed = IntVar()
         self.__rButton1 = Radiobutton(self.second_frame, text=f"CheckPoint -> new     ", variable=self.__rBtnPressed, value=CHECKPOINT_NEW)
@@ -57,7 +57,7 @@ class CustomMenu(tkinter.Frame):
         self.__ExportBtn.bind("<Button-1>", self.export_data)
 
         # Упаковка кнопок
-        self.vector.pack(side="top", fill="both")
+        self.coords.pack(side="top", fill="both")
 
         self.__rButton1.pack(side="top", fill="both")
         self.__rButton2.pack(side="top", fill="both")
@@ -95,10 +95,14 @@ class CustomMenu(tkinter.Frame):
         center_y = (y1 + y2) // 2
         if self.__rBtnPressed.get() == CHECKPOINT_NEW:
             self.checkpoints.append([x1, y1, x2, y2, center_x, center_y])
-            # TODO self.vector = self.canvas.create_line()
+            if len(self.checkpoints) > 1:
+                self.vector = self.canvas.create_line(self.checkpoints[-2][4] * 2 - 1, (270 - self.checkpoints[-2][5]) * 2, center_x * 2 - 1, (270 - center_y) * 2, arrow=LAST, fill='green')
         elif self.__rBtnPressed.get() == LAST_CHECKPOINT_REDRAW:
             self.checkpoints.pop()
             self.checkpoints.append([x1, y1, x2, y2, center_x, center_y])
+            if len(self.checkpoints) > 1:
+                self.canvas.delete(self.vector)
+                self.vector = self.canvas.create_line(self.checkpoints[-2][4] * 2 - 1, (270 - self.checkpoints[-2][5]) * 2, center_x * 2 - 1, (270 - center_y) * 2, arrow=LAST, fill='green')
         elif self.__rBtnPressed.get() == CONSTRAINT_NEW:
             self.constraints.append([x1, y1, x2, y2, center_x, center_y])
         elif self.__rBtnPressed.get() == LAST_CONSTRAINT_REDRAW:
@@ -107,7 +111,7 @@ class CustomMenu(tkinter.Frame):
         print(self.checkpoints, self.constraints)
 
     def on_move(self, event):
-        self.vector.configure(text=f'x - {int(event.x//2)+1}, y - {int(270-event.y//2)}')
+        self.coords.configure(text=f'x - {int(event.x//2)+1}, y - {int(270-event.y//2)}')
 
     def export_data(self, event):
         if os.path.exists(CONF_PATH):
@@ -124,7 +128,8 @@ class CustomMenu(tkinter.Frame):
                     f.write("\n_constraint(")
                     for i in range(len(stroke)):
                         if i != len(stroke) - 1:
-                            f.write(str(stroke[i]) + ', ')
+                            if i != 4 and i != 5:
+                                f.write(str(stroke[i]) + ', ')
                         else:
                             f.write(str(stroke[i]) + ');')
         else:
@@ -132,8 +137,7 @@ class CustomMenu(tkinter.Frame):
 
     def set_angle(self, event):
         print('test')
-        if self.__rBtnPressed.get() == CONSTRAINT_NEW:
-
+        if self.__rBtnPressed.get() == CONSTRAINT_NEW or self.__rBtnPressed.get():
             center_x = self.constraints[-1][4]
             center_y = self.constraints[-1][5]
             dot_x = event.x // 2 + 1
@@ -149,7 +153,11 @@ class CustomMenu(tkinter.Frame):
                     angle = m.acos(abs(center_y - dot_y)/m.sqrt((center_y - dot_y) ** 2 + (center_x - dot_x) ** 2)) * 180/m.pi + 180
                 else:
                     angle = m.asin(abs(center_y - dot_y)/m.sqrt((center_y - dot_y) ** 2 + (center_x - dot_x) ** 2)) * 180/m.pi + 270
-            self.constraints[-1].append(int(angle))
+
+            if len(self.constraints[-1]) == 6:
+                self.constraints[-1].append(int(angle))
+            else:
+                self.constraints[-1][-1] = int(angle)
             print(self.constraints)
 
 
