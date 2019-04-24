@@ -46,13 +46,15 @@ typedef struct{
     Coord p1;
     Coord p2;
     Coord center;
+    int angle;
 }CheckPoint;
 
-CheckPoint new_Checkpoint(Coord p1, Coord p2, Coord center){
+CheckPoint new_Checkpoint(Coord p1, Coord p2, Coord center, int angle){
     CheckPoint v;
     v.p1 = p1;
     v.p2 = p2;
     v.center = center;
+    v.angle = angle;
     return v;
 }
 
@@ -61,8 +63,8 @@ CheckPoint CHECKPOINTS[CHECKPOINTS_COUNT];
 
 int checkpoint_count = 0;
 
-void _checkpoint(int x1, int y1, int x2, int y2, int center_x, int center_y){
-    CHECKPOINTS[checkpoint_count++] = new_Checkpoint(new_Coord(x1, y1), new_Coord(x2, y2), new_Coord(center_x, center_y));
+void _checkpoint(int x1, int y1, int x2, int y2, int center_x, int center_y, int angle){
+    CHECKPOINTS[checkpoint_count++] = new_Checkpoint(new_Coord(x1, y1), new_Coord(x2, y2), new_Coord(center_x, center_y), angle);
 }
 
 // прямоугольник ограничения движения (изменение пути)
@@ -70,15 +72,15 @@ typedef struct{
     Coord p1;
     Coord p2;
     Coord center;
-    int degree;
+    int time_set;
 }Constraint;
 
-Constraint new_Constraint(Coord p1, Coord p2, Coord center, int degree){
+Constraint new_Constraint(Coord p1, Coord p2, Coord center, int time_set){
     Constraint v;
     v.p1 = p1;
     v.p2 = p2;
     v.center = center;
-    v.degree = degree;
+    v.time_set = time_set;
     return v;
 }
 
@@ -87,8 +89,8 @@ Constraint CONSTRAINTS[CONSTRAINTS_COUNT];
 
 int constraint_count = 0;
 
-void _constraint(int x1, int y1, int x2, int y2, int center_x, int center_y, int degree){
-    CONSTRAINTS[constraint_count++] = new_Constraint(new_Coord(x1, y1), new_Coord(x2, y2), new_Coord(center_x, center_y), degree);
+void _constraint(int x1, int y1, int x2, int y2, int center_x, int center_y, int time_set){
+    CONSTRAINTS[constraint_count++] = new_Constraint(new_Coord(x1, y1), new_Coord(x2, y2), new_Coord(center_x, center_y), time_set);
 }
 
 void _init_data(){

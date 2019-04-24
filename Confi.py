@@ -8,6 +8,7 @@ CHECKPOINT_NEW = 1
 LAST_CHECKPOINT_REDRAW = 2
 CONSTRAINT_NEW = 3
 LAST_CONSTRAINT_REDRAW = 4
+TIME_SET_COEFFICIENT = 0.007
 
 List_env = ['Environment ' + str(i) for i in range(4)]
 CONF_PATH = "configuration.txt"
@@ -93,21 +94,25 @@ class CustomMenu(tkinter.Frame):
         y2 = 270 - event.y // 2
         center_x = (x2 + x1) // 2
         center_y = (y1 + y2) // 2
+        time_set = int((x2 - x1) * (y2 - y1) * TIME_SET_COEFFICIENT)
         if self.__rBtnPressed.get() == CHECKPOINT_NEW:
-            self.checkpoints.append([x1, y1, x2, y2, center_x, center_y])
+            self.checkpoints.append([x1, y1, x2, y2, center_x, center_y, time_set])
+
             if len(self.checkpoints) > 1:
-                self.vector = self.canvas.create_line(self.checkpoints[-2][4] * 2 - 1, (270 - self.checkpoints[-2][5]) * 2, center_x * 2 - 1, (270 - center_y) * 2, arrow=LAST, fill='green')
+                self.vector_checkp = self.canvas.create_line(self.checkpoints[-2][4] * 2 - 1, (270 - self.checkpoints[-2][5]) * 2, center_x * 2 - 1, (270 - center_y) * 2, arrow=LAST, fill='green')
+
         elif self.__rBtnPressed.get() == LAST_CHECKPOINT_REDRAW:
             self.checkpoints.pop()
-            self.checkpoints.append([x1, y1, x2, y2, center_x, center_y])
+            self.checkpoints.append([x1, y1, x2, y2, center_x, center_y, time_set])
             if len(self.checkpoints) > 1:
-                self.canvas.delete(self.vector)
-                self.vector = self.canvas.create_line(self.checkpoints[-2][4] * 2 - 1, (270 - self.checkpoints[-2][5]) * 2, center_x * 2 - 1, (270 - center_y) * 2, arrow=LAST, fill='green')
+                self.canvas.delete(self.vector_checkp)
+                self.vector_checkp = self.canvas.create_line(self.checkpoints[-2][4] * 2 - 1, (270 - self.checkpoints[-2][5]) * 2, center_x * 2 - 1, (270 - center_y) * 2, arrow=LAST, fill='green')
         elif self.__rBtnPressed.get() == CONSTRAINT_NEW:
             self.constraints.append([x1, y1, x2, y2, center_x, center_y])
         elif self.__rBtnPressed.get() == LAST_CONSTRAINT_REDRAW:
             self.constraints.pop()
             self.constraints.append([x1, y1, x2, y2, center_x, center_y])
+            self.canvas.delete(self.vector_constr)
         print(self.checkpoints, self.constraints)
 
     def on_move(self, event):
@@ -137,12 +142,13 @@ class CustomMenu(tkinter.Frame):
 
     def set_angle(self, event):
         print('test')
-        if self.__rBtnPressed.get() == CONSTRAINT_NEW or self.__rBtnPressed.get():
-            center_x = self.constraints[-1][4]
-            center_y = self.constraints[-1][5]
+        if self.__rBtnPressed.get() == CONSTRAINT_NEW or self.__rBtnPressed.get() == self.__rBtnPressed.get() == LAST_CONSTRAINT_REDRAW:
+            if len(self.constraints[-1]) == 6:
+                x1, y1, x2, y2, center_x, center_y = self.constraints[-1]
+            elif len(self.constraints[-1]) == 7:
+                x1, y1, x2, y2, center_x, center_y, angle = self.constraints[-1]
             dot_x = event.x // 2 + 1
             dot_y = 270 - event.y // 2
-            print(center_x, center_y, dot_x, dot_y)
             if center_x > dot_x:
                 if center_y > dot_y:
                     angle = m.asin(abs(center_y - dot_y)/m.sqrt((center_y - dot_y) ** 2 + (center_x - dot_x) ** 2)) * 180/m.pi + 90
@@ -153,11 +159,43 @@ class CustomMenu(tkinter.Frame):
                     angle = m.acos(abs(center_y - dot_y)/m.sqrt((center_y - dot_y) ** 2 + (center_x - dot_x) ** 2)) * 180/m.pi + 180
                 else:
                     angle = m.asin(abs(center_y - dot_y)/m.sqrt((center_y - dot_y) ** 2 + (center_x - dot_x) ** 2)) * 180/m.pi + 270
-
+            angle = int(angle)
             if len(self.constraints[-1]) == 6:
-                self.constraints[-1].append(int(angle))
+                self.constraints[-1].append(angle)
             else:
-                self.constraints[-1][-1] = int(angle)
+                self.constraints[-1][-1] = angle
+
+            print(x1, y1, x2, y2, center_x, center_y, angle)
+
+
+
+            x3 = center_x * 2 + 1
+            y3 = (270 - center_y) * 2
+            x4 = dot_x * 2 + 1
+            y4 = (270 - dot_y) * 2
+            self.vector_constr = self.canvas.create_line(x3, y3, x4, y4, arrow=LAST, fill='red')
+
+            """ if 0 <= angle < 90:
+                x3 = (x2 + center_x) // 2
+                y3 = (center_y + y1) // 2
+                x4 = (center_x + x1) // 2
+                y4 = (y2 + center_y) // 2
+            elif 90 <= angle < 180:
+                x3 = (x2 + center_x) // 2
+                y3 = (y2 + center_y) // 2
+                x4 = (center_x + x1) // 2
+                y4 = (center_y + y1) // 2
+            elif 180 <= angle < 270:
+                x3 = (center_x + x1) // 2
+                y3 = (y2 + center_y) // 2
+                x4 = (x2 + center_x) // 2
+                y4 = (center_y + y1) // 2
+            elif 270 <= angle <= 360:
+                x3 = (center_x + x1) // 2
+                y3 = (center_y + y1) // 2
+                x4 = (x2 + center_x) // 2
+                y4 = (y2 + center_y) // 2
+            self.vector_constr = self.canvas.create_line(x3 * 2 + 1, (270 - y3) * 2, x4 * 2 + 1, (270 - y4) * 2, arrow=LAST, fill='red')"""
             print(self.constraints)
 
 
