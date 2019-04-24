@@ -231,6 +231,22 @@ rotation(int car_x, int car_y, int dot_x, int dot_y)
 			corner = asin(abs(car_y - dot_y)/sqrt((car_y - dot_y)*(car_y - dot_y)+(car_x-dot_x)*(car_x-dot_x)))*180/M_PI + 270;
 	return corner;
 }
+bool initFlag = false;
+
+void init_values()
+{
+    _checkpoint(242, 111, 270, 138, 256, 124);
+    _checkpoint(60, 157, 108, 199, 84, 178);
+}
+void init()
+{
+    if (!initFlag) {
+        initFlag = true;
+        init_values();
+        checkpoint_count = 0;
+    }
+
+}
 
 void Game0() {
 
@@ -636,13 +652,7 @@ void Game0() {
 
 void Game1()
 {
-    Coord pos;
-    pos = new_Coord(163, 239);
-    //124 181 171 221
-    int rectlnx =118;
-    int rectlny = 218;
-    int rectpvx = 210;
-    int rectpvy = 261;
+    init();
     if(SuperDuration>0)
     {
         SuperDuration--;
@@ -656,12 +666,41 @@ void Game1()
         Duration = 0;
         CurAction = 1;
     }
-    else if (PositionX < rectpvx && PositionX > rectlnx && PositionY < rectpvy && PositionY > rectlny)
+
+    else if (ourTime <= Time)
     {
-        Duration = 0;
-        CurAction = 1;
+        timeFlag = false;
+        checkpoint_count++;
+
     }
-    else if (Compass < rotation(PositionX, PositionY, pos.x, pos.y)-10 || Compass > rotation(PositionX, PositionY, pos.x, pos.y)+10 )
+    else if (PositionX <  CHECKPOINTS[checkpoint_count].p2.x &&
+                PositionX > CHECKPOINTS[checkpoint_count].p1.x &&
+                PositionY < CHECKPOINTS[checkpoint_count].p2.y &&
+                PositionY > CHECKPOINTS[checkpoint_count].p1.y)
+    {
+        if (CSLeft_R >= 200 && CSLeft_R <= 255 && CSLeft_G >= 150 && CSLeft_G <= 205 && CSLeft_B >= 0 &&
+           CSLeft_B <= 50 && CSRight_R >= 200 && CSRight_R <= 255 && CSRight_G >= 150 && CSRight_G <= 205 &&
+           CSRight_B >= 0 && CSRight_B <= 50)
+        {
+        Duration = 59;
+        CurAction = 3;
+        }
+        else
+        {
+        if (!timeFlag)
+        {
+            ourTime = Time + CHECKPOINTS[checkpoint_count].time;
+            timeFlag = true;
+
+        }
+
+        Duration = 50;
+        CurAction = 1;
+        }
+        //TODO: зависает при повороте.
+    }
+    else if (Compass < rotation(PositionX, PositionY, CHECKPOINTS[checkpoint_count].center.x, CHECKPOINTS[checkpoint_count].center.y)-10 ||
+             Compass > rotation(PositionX, PositionY, CHECKPOINTS[checkpoint_count].center.x, CHECKPOINTS[checkpoint_count].center.y)+10 )
     {
         Duration = 0;
         CurAction =2;
@@ -680,7 +719,7 @@ void Game1()
             MyState=0;
             break;
         case 2:
-            if (Compass < rotation(PositionX, PositionY, pos.x, pos.y)-10)
+            if (Compass < rotation(PositionX, PositionY, CHECKPOINTS[checkpoint_count].center.x, CHECKPOINTS[checkpoint_count].center.y)-10)
             {
                 WheelLeft=-1;
                 WheelRight=1;
@@ -696,6 +735,13 @@ void Game1()
                 MyState= 0;
                 break;
             }
+        case 3:
+            WheelLeft=0;
+            WheelRight=0;
+            LED_1=2;
+            MyState=0;
+            if(Duration == 1) {LoadedObjects = 0; checkpoint_count++; }
+            break;
         default:
             break;
     }
