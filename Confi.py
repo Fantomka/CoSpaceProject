@@ -2,11 +2,13 @@ from tkinter import *
 import tkinter.ttk
 from PIL import Image, ImageTk
 import os
+import math as m
 
 CHECKPOINT_NEW = 1
 LAST_CHECKPOINT_REDRAW = 2
 CONSTRAINT_NEW = 3
 LAST_CONSTRAINT_REDRAW = 4
+TIME_SET_COEFFICIENT = 0.007
 
 List_env = ['Environment ' + str(i) for i in range(4)]
 CONF_PATH = "configuration.txt"
@@ -30,9 +32,9 @@ class CustomMenu(tkinter.Frame):
         self.canvas.place(width=360*2, height=270*2)
         self.canvas.bind("<ButtonPress-1>", self.on_button_press)
         self.canvas.bind("<B1-Motion>", self.on_move_press)
-        # self.canvas.bind("<B1-Motion>", self.on_move)
         self.canvas.bind("<ButtonRelease-1>", self.on_button_release)
         self.canvas.bind("<Motion>", self.on_move)
+        self.canvas.bind("<Button-3>", self.set_angle)
 
         self.rect = None
         self.start_x = None
@@ -44,7 +46,7 @@ class CustomMenu(tkinter.Frame):
         self.second_frame = Frame(root, bg="#FFFFFF")
         self.second_frame.place(width=131, height=540, relx=0.845)
 
-        self.vector = Label(self.second_frame, text=f'x - 0, y - 0')
+        self.coords = Label(self.second_frame, text=f'x - 0, y - 0')
 
         self.__rBtnPressed = IntVar()
         self.__rButton1 = Radiobutton(self.second_frame, text=f"CheckPoint -> new     ", variable=self.__rBtnPressed, value=CHECKPOINT_NEW)
@@ -56,7 +58,7 @@ class CustomMenu(tkinter.Frame):
         self.__ExportBtn.bind("<Button-1>", self.export_data)
 
         # Упаковка кнопок
-        self.vector.pack(side="top", fill="both")
+        self.coords.pack(side="top", fill="both")
 
         self.__rButton1.pack(side="top", fill="both")
         self.__rButton2.pack(side="top", fill="both")
@@ -92,36 +94,109 @@ class CustomMenu(tkinter.Frame):
         y2 = 270 - event.y // 2
         center_x = (x2 + x1) // 2
         center_y = (y1 + y2) // 2
-
-        print(f'x1 - {x1} y1 - {y1} x2 - {x2}, y2 - {y2}, center_x - {center_x}, center_y - {center_y}')
+        time_set = int((x2 - x1) * (y2 - y1) * TIME_SET_COEFFICIENT)
         if self.__rBtnPressed.get() == CHECKPOINT_NEW:
-            self.checkpoints.append([x1, y1, x2, y2, center_x, center_y])
-            # TODO self.vector = self.canvas.create_line()
+            self.checkpoints.append([x1, y1, x2, y2, center_x, center_y, time_set])
+
+            if len(self.checkpoints) > 1:
+                self.vector_checkp = self.canvas.create_line(self.checkpoints[-2][4] * 2 - 1, (270 - self.checkpoints[-2][5]) * 2, center_x * 2 - 1, (270 - center_y) * 2, arrow=LAST, fill='green')
+
         elif self.__rBtnPressed.get() == LAST_CHECKPOINT_REDRAW:
             self.checkpoints.pop()
-            self.checkpoints.append([x1, y1, x2, y2, center_x, center_y])
+            self.checkpoints.append([x1, y1, x2, y2, center_x, center_y, time_set])
+            if len(self.checkpoints) > 1:
+                self.canvas.delete(self.vector_checkp)
+                self.vector_checkp = self.canvas.create_line(self.checkpoints[-2][4] * 2 - 1, (270 - self.checkpoints[-2][5]) * 2, center_x * 2 - 1, (270 - center_y) * 2, arrow=LAST, fill='green')
         elif self.__rBtnPressed.get() == CONSTRAINT_NEW:
             self.constraints.append([x1, y1, x2, y2, center_x, center_y])
         elif self.__rBtnPressed.get() == LAST_CONSTRAINT_REDRAW:
             self.constraints.pop()
             self.constraints.append([x1, y1, x2, y2, center_x, center_y])
+            self.canvas.delete(self.vector_constr)
         print(self.checkpoints, self.constraints)
 
     def on_move(self, event):
-        self.vector.configure(text=f'x - {int(event.x//2)+1}, y - {int(270-event.y//2)}')
+        self.coords.configure(text=f'x - {int(event.x//2)+1}, y - {int(270-event.y//2)}')
 
     def export_data(self, event):
         if os.path.exists(CONF_PATH):
             with open(CONF_PATH, "w") as f:
                 for stroke in self.checkpoints:
-                    f.write(f"\n_checkpoints({stroke[0]}, {stroke[1]}, {stroke[2]}, {stroke[3]}, {stroke[4]}, {stroke[5]});")
+                    f.write("\n_checkpoint(")
+                    for i in range(len(stroke)):
+                        if i != len(stroke) - 1:
+                            f.write(str(stroke[i]) + ', ')
+                        else:
+                            f.write(str(stroke[i]) + ');')
                 f.write("\n")
                 for stroke in self.constraints:
-                    f.write(f"\n_constraints({stroke[0]}, {stroke[1]}, {stroke[2]}, {stroke[3]}, {stroke[4]}, {stroke[5]});")
-            f.close()
+                    f.write("\n_constraint(")
+                    for i in range(len(stroke)):
+                        if i != len(stroke) - 1:
+                            if i != 4 and i != 5:
+                                f.write(str(stroke[i]) + ', ')
+                        else:
+                            f.write(str(stroke[i]) + ');')
         else:
             f = open(CONF_PATH, 'w')
 
+    def set_angle(self, event):
+        print('test')
+        if self.__rBtnPressed.get() == CONSTRAINT_NEW or self.__rBtnPressed.get() == self.__rBtnPressed.get() == LAST_CONSTRAINT_REDRAW:
+            if len(self.constraints[-1]) == 6:
+                x1, y1, x2, y2, center_x, center_y = self.constraints[-1]
+            elif len(self.constraints[-1]) == 7:
+                x1, y1, x2, y2, center_x, center_y, angle = self.constraints[-1]
+            dot_x = event.x // 2 + 1
+            dot_y = 270 - event.y // 2
+            if center_x > dot_x:
+                if center_y > dot_y:
+                    angle = m.asin(abs(center_y - dot_y)/m.sqrt((center_y - dot_y) ** 2 + (center_x - dot_x) ** 2)) * 180/m.pi + 90
+                else:
+                    angle = m.acos(abs(center_y - dot_y)/m.sqrt((center_y - dot_y) ** 2 + (center_x - dot_x) ** 2)) * 180/m.pi
+            else:
+                if center_y > dot_y:
+                    angle = m.acos(abs(center_y - dot_y)/m.sqrt((center_y - dot_y) ** 2 + (center_x - dot_x) ** 2)) * 180/m.pi + 180
+                else:
+                    angle = m.asin(abs(center_y - dot_y)/m.sqrt((center_y - dot_y) ** 2 + (center_x - dot_x) ** 2)) * 180/m.pi + 270
+            angle = int(angle)
+            if len(self.constraints[-1]) == 6:
+                self.constraints[-1].append(angle)
+            else:
+                self.constraints[-1][-1] = angle
+
+            print(x1, y1, x2, y2, center_x, center_y, angle)
+
+
+
+            x3 = center_x * 2 + 1
+            y3 = (270 - center_y) * 2
+            x4 = dot_x * 2 + 1
+            y4 = (270 - dot_y) * 2
+            self.vector_constr = self.canvas.create_line(x3, y3, x4, y4, arrow=LAST, fill='red')
+
+            """ if 0 <= angle < 90:
+                x3 = (x2 + center_x) // 2
+                y3 = (center_y + y1) // 2
+                x4 = (center_x + x1) // 2
+                y4 = (y2 + center_y) // 2
+            elif 90 <= angle < 180:
+                x3 = (x2 + center_x) // 2
+                y3 = (y2 + center_y) // 2
+                x4 = (center_x + x1) // 2
+                y4 = (center_y + y1) // 2
+            elif 180 <= angle < 270:
+                x3 = (center_x + x1) // 2
+                y3 = (y2 + center_y) // 2
+                x4 = (x2 + center_x) // 2
+                y4 = (center_y + y1) // 2
+            elif 270 <= angle <= 360:
+                x3 = (center_x + x1) // 2
+                y3 = (center_y + y1) // 2
+                x4 = (x2 + center_x) // 2
+                y4 = (y2 + center_y) // 2
+            self.vector_constr = self.canvas.create_line(x3 * 2 + 1, (270 - y3) * 2, x4 * 2 + 1, (270 - y4) * 2, arrow=LAST, fill='red')"""
+            print(self.constraints)
 
 
 if __name__ == '__main__':
