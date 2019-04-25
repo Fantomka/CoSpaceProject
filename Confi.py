@@ -120,10 +120,18 @@ class CustomMenu(tk.Tk):
         После этого рисуются вектора
         :param event: отжатие лкм
         """
-        x_left = self.start_x // 2 + 1
-        y_left = 270 - self.start_y // 2             # Пересчет координат
-        x_right = event.x // 2 + 1                   # Необходимо из-за
-        y_right = 270 - event.y // 2                 # разных систем координат
+        if self.start_x < event.x:
+            x_left = self.start_x // 2 + 1          # Поиск координат
+            x_right = event.x // 2 + 1              # Левой нижней
+        else:                                       # И правой верхней точки
+            x_left = event.x // 2 + 1
+            x_right = self.start_x // 2 + 1         # Так же идет пересчет координат
+        if self.start_y > event.y:                  # Необходимо из-за
+            y_left = 270 - self.start_y // 2        # разных систем координат
+            y_right = 270 - event.y // 2
+        else:
+            y_left = 270 - event.y // 2
+            y_right = 270 - self.start_y // 2
         center_x = (x_right + x_left) // 2
         center_y = (y_left + y_right) // 2
         time_set = int((x_right - x_left) * (y_right - y_left) * TIME_SET_COEFFICIENT)
@@ -131,11 +139,11 @@ class CustomMenu(tk.Tk):
         if self.rb_press.get() == NEW_CHECKPOINT:    # соохраняем координаты и рисуем вектор между чекпоинтами
             self.checkpoints.append([x_left, y_left, x_right, y_right, center_x, center_y, time_set])
             if len(self.checkpoints) > 1:
-                self.vector_checkp = self.canvas.create_line(self.checkpoints[-2][4] * 2 - 1, \
+                self.vector_checkp = self.canvas.create_line(self.checkpoints[-2][4] * 2 - 1,     \
                                                              (270 - self.checkpoints[-2][5]) * 2, \
-                                                             center_x * 2 - 1, \
-                                                             (270 - center_y) * 2, \
-                                                             arrow=tk.LAST, \
+                                                             center_x * 2 - 1,                    \
+                                                             (270 - center_y) * 2,                \
+                                                             arrow=tk.LAST,                       \
                                                              fill='green')
 
         elif self.rb_press.get() == REDRAW_CHECKPOINT:       # перезаписываем список
@@ -143,11 +151,11 @@ class CustomMenu(tk.Tk):
             self.checkpoints.append([x_left, y_left, x_right, y_right, center_x, center_y, time_set])
             if len(self.checkpoints) > 1:
                 self.canvas.delete(self.vector_checkp)
-                self.vector_checkp = self.canvas.create_line(self.checkpoints[-2][4] * 2 - 1, \
+                self.vector_checkp = self.canvas.create_line(self.checkpoints[-2][4] * 2 - 1,     \
                                                              (270 - self.checkpoints[-2][5]) * 2, \
-                                                             center_x * 2 - 1, \
-                                                             (270 - center_y) * 2, \
-                                                             arrow=tk.LAST,\
+                                                             center_x * 2 - 1,                    \
+                                                             (270 - center_y) * 2,                \
+                                                             arrow=tk.LAST,                       \
                                                              fill='green')
 
         elif self.rb_press.get() == CONSTRAINT_NEW:  # (прорисовка вектора происходит в set_angle)
