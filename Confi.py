@@ -32,6 +32,7 @@ TIME_SET_COEFFICIENT = 0.007
 # пути для карты и output file
 CONF_PATH = "configuration.txt"
 MAP_PATH = '1.png'
+FIRMWARE_PATH = './CsBot/our_ai.c'
 
 
 class CustomMenu(tk.Tk):
@@ -164,32 +165,6 @@ class CustomMenu(tk.Tk):
         """
         self.coords.configure(text=f'x - {int(event.x//2)+1}, y - {int(270-event.y//2)}')
 
-    def export_data(self, event):
-        """
-        Экспорт списков self.checkpoints и self.constraints
-        в формате, понимаемом нашей прошивкой робота
-        :param event: нажатие кнопки Exports
-        """
-        with open(CONF_PATH, "w") as file:
-            for stroke in self.checkpoints:     # Экспорт чекпоинтов
-                file.write("\n_checkpoint(")
-                for i in range(len(stroke)):
-                    if i != len(stroke) - 1:
-                        file.write(str(stroke[i]) + ', ')
-                    else:
-                        file.write(str(stroke[i]) + ');')
-
-            file.write("\n")                       # разделяем группы выходных функций
-
-            for stroke in self.constraints:     # Экспорт ограничений
-                file.write("\n_constraint(")
-                for i in range(len(stroke)):
-                    if i != len(stroke) - 1:
-                        if i not in (4, 5):   # игнорируем элементы с индексом 4, 5
-                            file.write(str(stroke[i]) + ', ') # тк они не нужны
-                    else:
-                        file.write(str(stroke[i]) + ');')
-
     def set_angle(self, event):
         """
         Высчитавыет угол в соответсвии с тригонометрическим кругом, данный на площадке
@@ -228,6 +203,43 @@ class CustomMenu(tk.Tk):
         x_end = dot_x * 2 + 1              # для вектора
         y_end = (270 - dot_y) * 2
         self.vector_constr = self.canvas.create_line(x_begin, y_begin, x_end, y_end, arrow=tk.LAST, fill='red')
+
+    def export_data(self, event):
+        """
+        Экспорт списков self.checkpoints и self.constraints
+        в формате, понимаемом нашей прошивкой робота напрямую в прошивку
+        :param event: нажатие кнопки Exports
+        """
+        #  Собираем и форматируем данные на экспорт в прошивку
+        export_buffer = []
+        for stroke in self.checkpoints:
+            temp = '_checkpoint('
+            for i, elem in enumerate(stroke):
+                if i != len(stroke) - 1:
+                    temp += str(elem) + ', '
+                else:
+                    temp += str(elem) + ');\n'
+            export_buffer.append(temp)
+        export_buffer.append('\n')
+        for stroke in self.constraints:
+            temp = '_constraint('
+            for i, elem in enumerate(stroke):
+                if i != len(stroke) - 1:
+                    if i not in (4, 5):
+                        temp += str(elem) + ', '
+                else:
+                    temp += str(elem) + ');\n'
+            export_buffer.append(temp)
+
+        with open(FIRMWARE_PATH, 'r+') as file:
+            contents = file.readlines()                 # сохраняем код в буфер
+            for i, line in enumerate(contents):
+                if 'void init_values(){' in line:       # Парсим строку после которой произойдет вставка
+                    for j, func in enumerate(export_buffer, start=1):
+                        contents.insert(i + j, func)    # Вставка в буффер данные на экспорт
+                    break
+            file.seek(0)                                # Обнуляем указатель файла
+            file.writelines(contents)                   # Переписываем фал с вставленными данными
 
 
 if __name__ == '__main__':

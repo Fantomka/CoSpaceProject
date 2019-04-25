@@ -249,19 +249,9 @@ rotation(int x, int y, Coord dot)
 }
 bool initFlag = false;
 
-void init_values()
-{
-    /*_checkpoint(166, 45, 228, 105, 197, 75, 26);
-    _checkpoint(242, 113, 270, 138, 256, 125, 4);
-    _checkpoint(170, 197, 211, 232, 190, 214, 10);
-    _checkpoint(243, 113, 268, 137, 255, 125, 4);
-    _constraint(242, 166, 274, 175, 48);
-    _constraint(242, 141, 275, 150, 41);
-    */
-    _checkpoint(171, 193, 230, 247, 200, 220, 22);
+void init_values(){
 
-    _constraint(186, 34, 225, 62, 70);
-    _constraint(177, 153, 221, 185, 280);
+
 }
 
 bool timeFlag = false;
@@ -779,8 +769,8 @@ void Game1()
     switch(CurAction)
     {
         case 1:
-            WheelLeft=2;
-            WheelRight=2;
+            WheelLeft=3;
+            WheelRight=3;
             LED_1=0;
             MyState=0;
             break;
