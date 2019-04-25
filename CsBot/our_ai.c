@@ -46,15 +46,15 @@ typedef struct{
     Coord p1;
     Coord p2;
     Coord center;
-    int angle;
+    int time_set;
 }CheckPoint;
 
-CheckPoint new_Checkpoint(Coord p1, Coord p2, Coord center, int angle){
+CheckPoint new_Checkpoint(Coord p1, Coord p2, Coord center, int time_set){
     CheckPoint v;
     v.p1 = p1;
     v.p2 = p2;
     v.center = center;
-    v.angle = angle;
+    v.time_set = time_set;
     return v;
 }
 
@@ -63,43 +63,34 @@ CheckPoint CHECKPOINTS[CHECKPOINTS_COUNT];
 
 int checkpoint_count = 0;
 
-void _checkpoint(int x1, int y1, int x2, int y2, int center_x, int center_y, int angle){
-    CHECKPOINTS[checkpoint_count++] = new_Checkpoint(new_Coord(x1, y1), new_Coord(x2, y2), new_Coord(center_x, center_y), angle);
+void _checkpoint(int x1, int y1, int x2, int y2, int center_x, int center_y, int time_set){
+    CHECKPOINTS[checkpoint_count++] = new_Checkpoint(new_Coord(x1, y1), new_Coord(x2, y2), new_Coord(center_x, center_y), time_set);
 }
 
 // прямоугольник ограничения движения (изменение пути)
 typedef struct{
     Coord p1;
     Coord p2;
-    Coord center;
-    int time_set;
+    int angle;
 }Constraint;
 
-Constraint new_Constraint(Coord p1, Coord p2, Coord center, int time_set){
+Constraint new_Constraint(Coord p1, Coord p2, int angle){
     Constraint v;
     v.p1 = p1;
     v.p2 = p2;
-    v.center = center;
-    v.time_set = time_set;
+    v.angle = angle;
     return v;
 }
 
-#define CONSTRAINTS_COUNT 10
-Constraint CONSTRAINTS[CONSTRAINTS_COUNT];
+Constraint CONSTRAINTS[100];
 
 int constraint_count = 0;
 
-void _constraint(int x1, int y1, int x2, int y2, int center_x, int center_y, int time_set){
-    CONSTRAINTS[constraint_count++] = new_Constraint(new_Coord(x1, y1), new_Coord(x2, y2), new_Coord(center_x, center_y), time_set);
+void _constraint(int x1, int y1, int x2, int y2, int angle){
+    CONSTRAINTS[constraint_count++] = new_Constraint(new_Coord(x1, y1), new_Coord(x2, y2), angle);
 }
 
-void _init_data(){
-    // данные из конфигуратора
-
-
-}
-
-//======variables======
+//======Переменные======
 int Duration = 0;
 int SuperDuration = 0;
 int bGameEnd = false;
@@ -223,21 +214,68 @@ DLL_EXPORT void GetCommand(int *AI_OUT)
     AI_OUT[3] = MyState;
 }
 
-rotation(Coord car, Coord dot)
+bool constraint_zone(int PosX, int PosY, int *tempangle)
+{
+	int iterat;
+	for (iterat = 0; iterat < constraint_count; iterat++ )
+	{
+		if (PosX < CONSTRAINTS[iterat].p2.x &&
+            PosX > CONSTRAINTS[iterat].p1.x &&
+            PosY < CONSTRAINTS[iterat].p2.y &&
+            PosY > CONSTRAINTS[iterat].p1.y)
+        {
+        	*tempangle = CONSTRAINTS[iterat].angle;
+        	return true;
+		}
+	}
+	return false;
+}
+
+rotation(int x, int y, Coord dot)
 {
 
 	int angle = 0;
-	if (car.x>dot.x)
-		if (car.y>dot.y)
-			angle = acos(abs(car.y - dot.y)/sqrt((car.y - dot.y)*(car.y - dot.y)+(car.x-dot.x)*(car.x-dot.x)))*180/M_PI +90;
+	if (x>dot.x)
+		if (y>dot.y)
+			angle = asin(abs(y - dot.y)/sqrt((y - dot.y)*(y - dot.y)+(x-dot.x)*(x-dot.x)))*180/M_PI +90;
 		else
-			angle = acos(abs(car.y - dot.y)/sqrt((car.y - dot.y)*(car.y - dot.y)+(car.x-dot.x)*(car.x-dot.x)))*180/M_PI;
+			angle = acos(abs(y - dot.y)/sqrt((y - dot.y)*(y - dot.y)+(x-dot.x)*(x-dot.x)))*180/M_PI;
 	else
-		if (car.y>dot.y)
-			angle = asin(abs(car.y - dot.y)/sqrt((car.y - dot.y)*(car.y - dot.y)+(car.x-dot.x)*(car.x-dot.x)))*180/M_PI + 180;
+		if (y>dot.y)
+			angle = acos(abs(y - dot.y)/sqrt((y - dot.y)*(y - dot.y)+(x-dot.x)*(x-dot.x)))*180/M_PI + 180;
 		else
-			angle = asin(abs(car.y - dot.y)/sqrt((car.y - dot.y)*(car.y - dot.y)+(car.x-dot.x)*(car.x-dot.x)))*180/M_PI + 270;
+			angle = asin(abs(y - dot.y)/sqrt((y - dot.y)*(y - dot.y)+(x-dot.x)*(x-dot.x)))*180/M_PI + 270;
 	return angle;
+}
+bool initFlag = false;
+
+void init_values()
+{
+    /*_checkpoint(166, 45, 228, 105, 197, 75, 26);
+    _checkpoint(242, 113, 270, 138, 256, 125, 4);
+    _checkpoint(170, 197, 211, 232, 190, 214, 10);
+    _checkpoint(243, 113, 268, 137, 255, 125, 4);
+    _constraint(242, 166, 274, 175, 48);
+    _constraint(242, 141, 275, 150, 41);
+    */
+    _checkpoint(171, 193, 230, 247, 200, 220, 22);
+
+    _constraint(186, 34, 225, 62, 70);
+    _constraint(177, 153, 221, 185, 280);
+}
+
+bool timeFlag = false;
+int ourTime = 1500;
+int angle = 0;
+
+void init()
+{
+    if (!initFlag) {
+        initFlag = true;
+        init_values();
+        checkpoint_count = 0;
+    }
+    angle = 0;
 }
 
 void Game0() {
@@ -292,14 +330,14 @@ void Game0() {
     } else if (goingtodeposit == 3) {
         Duration = 0;
         CurAction = 12;
-    } else if (//red//
+    } else if (//красный//
             (((CSLeft_R >= 200 && CSLeft_R <= 255 && CSLeft_G >= 20 && CSLeft_G <= 50 && CSLeft_B >= 20 &&
                CSLeft_B <= 50)
               ||
               (CSRight_R >= 200 && CSRight_R <= 255 && CSRight_G >= 20 && CSRight_G <= 50 && CSRight_B >= 20 &&
                CSRight_B <= 50))
              ||
-             //cyan//
+             //синий//
              ((CSLeft_R >= 15 && CSLeft_R <= 50 && CSLeft_G >= 220 && CSLeft_G <= 255 && CSLeft_B >= 220 &&
                CSLeft_B <= 255)
               ||
@@ -307,7 +345,7 @@ void Game0() {
                CSRight_B <= 255))
 
              ||
-             //black//
+             //черный//
              ((CSLeft_R >= 14 && CSLeft_R <= 40 && CSLeft_G >= 14 && CSLeft_G <= 40 && CSLeft_B >= 14 && CSLeft_B <= 40)
               ||
               (CSRight_R >= 14 && CSRight_R <= 40 && CSRight_G >= 14 && CSRight_G <= 40 && CSRight_B >= 14 &&
@@ -644,13 +682,7 @@ void Game0() {
 
 void Game1()
 {
-    Coord pos;
-    pos = new_Coord(163, 239);
-    //124 181 171 221
-    int rectlnx =118;
-    int rectlny = 218;
-    int rectpvx = 210;
-    int rectpvy = 261;
+    init();
     if(SuperDuration>0)
     {
         SuperDuration--;
@@ -664,12 +696,77 @@ void Game1()
         Duration = 0;
         CurAction = 1;
     }
-    else if (PositionX < rectpvx && PositionX > rectlnx && PositionY < rectpvy && PositionY > rectlny)
+    else if (//красный//
+            (((CSLeft_R >= 200 && CSLeft_R <= 255 && CSLeft_G >= 20 && CSLeft_G <= 50 && CSLeft_B >= 20 &&
+               CSLeft_B <= 50)
+              ||
+              (CSRight_R >= 200 && CSRight_R <= 255 && CSRight_G >= 20 && CSRight_G <= 50 && CSRight_B >= 20 &&
+               CSRight_B <= 50))
+             ||
+             //синий//
+             ((CSLeft_R >= 15 && CSLeft_R <= 50 && CSLeft_G >= 220 && CSLeft_G <= 255 && CSLeft_B >= 220 &&
+               CSLeft_B <= 255)
+              ||
+              (CSRight_R >= 15 && CSRight_R <= 50 && CSRight_G >= 220 && CSRight_G <= 255 && CSRight_B >= 220 &&
+               CSRight_B <= 255))
+
+             ||
+             //черный//
+             ((CSLeft_R >= 14 && CSLeft_R <= 40 && CSLeft_G >= 14 && CSLeft_G <= 40 && CSLeft_B >= 14 && CSLeft_B <= 40)
+              ||
+              (CSRight_R >= 14 && CSRight_R <= 40 && CSRight_G >= 14 && CSRight_G <= 40 && CSRight_B >= 14 &&
+               CSRight_B <= 40)))
+            )
     {
+        Duration = 49;
+        CurAction = 5;
+    }
+    else if (constraint_zone(PositionX,PositionY,&angle) == true)
+	{
+	    if (Compass < angle-10 ||
+            Compass > angle+10 )
+        {
+            Duration = 0;
+		    CurAction = 4;
+        }
+        else{
+            Duration = 0;
+            CurAction = 1;
+        }
+	}
+
+    else if (ourTime <= Time)
+    {
+        timeFlag = false;
+        checkpoint_count++;
+        ourTime = 1500;
+
+    }
+    else if (PositionX <  CHECKPOINTS[checkpoint_count].p2.x &&
+                PositionX > CHECKPOINTS[checkpoint_count].p1.x &&
+                PositionY < CHECKPOINTS[checkpoint_count].p2.y &&
+                PositionY > CHECKPOINTS[checkpoint_count].p1.y)
+    {
+        if (CSLeft_R >= 200 && CSLeft_R <= 255 && CSLeft_G >= 150 && CSLeft_G <= 205 && CSLeft_B >= 0 &&
+           CSLeft_B <= 50 && CSRight_R >= 200 && CSRight_R <= 255 && CSRight_G >= 150 && CSRight_G <= 205 &&
+           CSRight_B >= 0 && CSRight_B <= 50)
+        {
+        Duration = 59;
+        CurAction = 3;
+        }
+        else
+        {
+        if (!timeFlag)
+        {
+            ourTime = Time + CHECKPOINTS[checkpoint_count].time_set;
+            timeFlag = true;
+        }
         Duration = 0;
         CurAction = 1;
+        }
     }
-    else if (Compass < rotation(PositionX, PositionY, pos.x, pos.y)-10 || Compass > rotation(PositionX, PositionY, pos.x, pos.y)+10 )
+    else if (Compass < rotation(PositionX, PositionY, CHECKPOINTS[checkpoint_count].center)-10 ||
+             Compass > rotation(PositionX, PositionY, CHECKPOINTS[checkpoint_count].center)+10 )
     {
         Duration = 0;
         CurAction =2;
@@ -688,7 +785,7 @@ void Game1()
             MyState=0;
             break;
         case 2:
-            if (Compass < rotation(PositionX, PositionY, pos.x, pos.y)-10)
+            if (Compass < rotation(PositionX, PositionY, CHECKPOINTS[checkpoint_count].center)-10)
             {
                 WheelLeft=-1;
                 WheelRight=1;
@@ -704,6 +801,37 @@ void Game1()
                 MyState= 0;
                 break;
             }
+        case 3:
+            WheelLeft=0;
+            WheelRight=0;
+            LED_1=2;
+            MyState=0;
+            if(Duration == 1) {LoadedObjects = 0; checkpoint_count++; }
+            break;
+        case 4:
+            if (Compass < angle-10)
+            {
+                WheelLeft=-1;
+                WheelRight=1;
+                LED_1= 0;
+                MyState= 0;
+                break;
+            }
+            else
+            {
+                WheelLeft= 1;
+                WheelRight= -1;
+                LED_1= 0;
+                MyState= 0;
+                break;
+            }
+        case 5:
+            WheelLeft = 0;
+            WheelRight = 0;
+            LED_1 = 1;
+            MyState = 0;
+            if (Duration == 1) LoadedObjects++;
+            break;
         default:
             break;
     }
