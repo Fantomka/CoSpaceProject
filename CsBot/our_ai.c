@@ -267,7 +267,8 @@ void init_values()
 bool timeFlag = false;
 int ourTime = 1500;
 int angle = 0;
-
+bool SuperObjectFlag = false;
+Coord SuperCoord;
 void init()
 {
     if (!initFlag) {
@@ -275,6 +276,14 @@ void init()
         init_values();
         checkpoint_count = 0;
     }
+    if (SuperObj_X != 0 || SuperObj_Y !=0)
+    {
+        SuperObjectFlag = true;
+        SuperCoord.x = SuperObj_X;
+        SuperCoord.y = SuperObj_Y;
+
+    }
+
     angle = 0;
 }
 
@@ -696,6 +705,31 @@ void Game1()
         Duration = 0;
         CurAction = 1;
     }
+    else if (//суперобъект//
+            (((CSRight_R > 232 - 10) && (CSRight_R < 250 + 10)) && ((CSRight_G > 30 - 10) && (CSRight_G < 41 + 10)) &&
+             ((CSRight_B > 255 - 10) && (CSRight_B < 255 + 10)))
+            ||
+            (((CSLeft_R > 232 - 10) && (CSLeft_R < 250 + 10)) && ((CSLeft_G > 30 - 10) && (CSLeft_G < 41 + 10)) &&
+            ((CSLeft_B > 255 - 10) && (CSLeft_B < 255 + 10))))
+    {
+        Duration = 49;
+        CurAction = 5;
+        SuperObjectFlag = false;
+    }
+    else if (SuperObjectFlag)
+    {
+        if (Compass < rotation(PositionX, PositionY, SuperCoord)-10 ||
+            Compass > rotation(PositionX, PositionY, SuperCoord)+10 )
+        {
+            Duration = 0;
+            CurAction =6;
+        }
+        else
+        {
+            Duration = 0;
+            CurAction = 1;
+        }
+    }
     else if (//красный//
             (((CSLeft_R >= 200 && CSLeft_R <= 255 && CSLeft_G >= 20 && CSLeft_G <= 50 && CSLeft_B >= 20 &&
                CSLeft_B <= 50)
@@ -721,7 +755,7 @@ void Game1()
         Duration = 49;
         CurAction = 5;
     }
-    else if (constraint_zone(PositionX,PositionY,&angle) == true)
+    else if (constraint_zone(PositionX,PositionY,&angle))
 	{
 	    if (Compass < angle-10 ||
             Compass > angle+10 )
@@ -832,6 +866,23 @@ void Game1()
             MyState = 0;
             if (Duration == 1) LoadedObjects++;
             break;
+        case 6:
+            if (Compass < rotation(PositionX, PositionY, SuperCoord)-10)
+            {
+                WheelLeft=-1;
+                WheelRight=1;
+                LED_1= 0;
+                MyState= 0;
+                break;
+            }
+            else
+            {
+                WheelLeft= 1;
+                WheelRight= -1;
+                LED_1= 0;
+                MyState= 0;
+                break;
+            }
         default:
             break;
     }
