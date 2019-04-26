@@ -246,15 +246,28 @@ rotation(int x, int y, Coord dot)
 			angle = asin(abs(y - dot.y)/sqrt((y - dot.y)*(y - dot.y)+(x-dot.x)*(x-dot.x)))*180/M_PI + 270;
 	return angle;
 }
+Coord Deppoint;
+void _deposit(int a, int b)
+{
+    Deppoint.x = a;
+    Deppoint.y = b;
+}
 bool initFlag = false;
 
 void init_values(){
-_checkpoint(227, 221, 276, 266, 252, 242, 15);
-_checkpoint(60, 147, 99, 189, 79, 168, 11);
-_checkpoint(130, 79, 174, 110, 152, 94, 9);
-_checkpoint(239, 111, 269, 137, 254, 124, 5);
+_checkpoint(233, 223, 276, 262, 254, 242, 11);
+_checkpoint(124, 178, 173, 219, 148, 198, 14);
+_checkpoint(53, 123, 91, 155, 72, 139, 8);
+_checkpoint(242, 110, 270, 139, 256, 124, 5);
+_checkpoint(277, 163, 321, 202, 299, 182, 12);
+_checkpoint(327, 118, 360, 150, 343, 134, 7);
+_checkpoint(280, 113, 302, 137, 291, 125, 3);
 
-_constraint(185, 40, 221, 71, 322);
+_deposit(255, 124);
+
+_constraint(182, 46, 218, 71, 306);
+_constraint(241, 76, 251, 110, 356);
+_constraint(241, 140, 251, 175, 202);
 
 
 
@@ -265,6 +278,7 @@ _constraint(185, 40, 221, 71, 322);
 
 
 bool timeFlag = false;
+bool DeppointFlag = false;
 int ourTime = 1500;
 bool SuperObjectFlag = false;
 Coord SuperCoord;
@@ -712,6 +726,31 @@ void Game1()
         Duration = 49;
         CurAction = 5;
         SuperObjectFlag = false;
+        DeppointFlag = true;
+    }
+    else if (//оранжевый//
+            CSLeft_R >= 200 && CSLeft_R <= 255 && CSLeft_G >= 150 && CSLeft_G <= 205 && CSLeft_B >= 0 &&
+             CSLeft_B <= 50 && CSRight_R >= 200 && CSRight_R <= 255 && CSRight_G >= 150 && CSRight_G <= 205 &&
+             CSRight_B >= 0 && CSRight_B <= 50 && DeppointFlag == true)
+    {
+        Duration = 59;
+        CurAction = 3;
+        checkpoint_count--;
+        DeppointFlag = false;
+    }
+    else if (DeppointFlag)
+    {
+        if (Compass < rotation(PositionX, PositionY, Deppoint)-10 ||
+            Compass > rotation(PositionX, PositionY, Deppoint)+10 )
+        {
+            Duration = 0;
+            CurAction =7;
+        }
+        else
+        {
+            Duration = 0;
+            CurAction = 1;
+        }
     }
     else if (SuperObjectFlag)
     {
@@ -746,7 +785,7 @@ void Game1()
              ((CSLeft_R >= 14 && CSLeft_R <= 40 && CSLeft_G >= 14 && CSLeft_G <= 40 && CSLeft_B >= 14 && CSLeft_B <= 40)
               ||
               (CSRight_R >= 14 && CSRight_R <= 40 && CSRight_G >= 14 && CSRight_G <= 40 && CSRight_B >= 14 &&
-               CSRight_B <= 40)))
+               CSRight_B <= 40))) && (LoadedObjects < 6)
             )
     {
         Duration = 49;
@@ -911,6 +950,23 @@ void Game1()
             break;
         case 6:
             if (Compass < rotation(PositionX, PositionY, SuperCoord)-10)
+            {
+                WheelLeft=-1;
+                WheelRight=1;
+                LED_1= 0;
+                MyState= 0;
+                break;
+            }
+            else
+            {
+                WheelLeft= 1;
+                WheelRight= -1;
+                LED_1= 0;
+                MyState= 0;
+                break;
+            }
+        case 7:
+            if (Compass < rotation(PositionX, PositionY, Deppoint)-10)
             {
                 WheelLeft=-1;
                 WheelRight=1;
