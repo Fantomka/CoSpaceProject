@@ -214,7 +214,7 @@ DLL_EXPORT void GetCommand(int *AI_OUT)
     AI_OUT[3] = MyState;
 }
 
-bool constraint_zone(int PosX, int PosY, int *tempangle)
+bool constraint_zone(int PosX, int PosY)
 {
 	int iterat;
 	for (iterat = 0; iterat < constraint_count; iterat++ )
@@ -224,11 +224,10 @@ bool constraint_zone(int PosX, int PosY, int *tempangle)
             PosY < CONSTRAINTS[iterat].p2.y &&
             PosY > CONSTRAINTS[iterat].p1.y)
         {
-        	*tempangle = CONSTRAINTS[iterat].angle;
-        	return true;
+        	return CONSTRAINTS[iterat].angle;
 		}
 	}
-	return false;
+	return 0;
 }
 
 rotation(int x, int y, Coord dot)
@@ -258,15 +257,18 @@ void init_values()
     _constraint(242, 166, 274, 175, 48);
     _constraint(242, 141, 275, 150, 41);
     */
-    _checkpoint(171, 193, 230, 247, 200, 220, 22);
 
-    _constraint(186, 34, 225, 62, 70);
-    _constraint(177, 153, 221, 185, 280);
+    _checkpoint(126, 208, 190, 261, 158, 234, 23);
+    _checkpoint(243, 111, 269, 138, 256, 124, 4);
+    _checkpoint(81, 59, 81, 59, 81, 59, 0);
+
+    _constraint(178, 47, 232, 78, 64);
+    _constraint(181, 130, 226, 166, 271);
+    _constraint(241, 141, 252, 175, 181);
 }
 
 bool timeFlag = false;
 int ourTime = 1500;
-int angle = 0;
 bool SuperObjectFlag = false;
 Coord SuperCoord;
 void init()
@@ -283,8 +285,6 @@ void init()
         SuperCoord.y = SuperObj_Y;
 
     }
-
-    angle = 0;
 }
 
 void Game0() {
@@ -755,18 +755,16 @@ void Game1()
         Duration = 49;
         CurAction = 5;
     }
-    else if (constraint_zone(PositionX,PositionY,&angle))
+    else if (Compass >= constraint_zone(PositionX,PositionY)-10 &&
+             Compass <= constraint_zone(PositionX,PositionY)+10 && constraint_zone(PositionX,PositionY) !=0  )
+    {
+        Duration = 10;
+        CurAction =1;
+    }
+    else if (constraint_zone(PositionX,PositionY) !=0 )
 	{
-	    if (Compass < angle-10 ||
-            Compass > angle+10 )
-        {
             Duration = 0;
 		    CurAction = 4;
-        }
-        else{
-            Duration = 0;
-            CurAction = 1;
-        }
 	}
 
     else if (ourTime <= Time)
@@ -819,22 +817,46 @@ void Game1()
             MyState=0;
             break;
         case 2:
-            if (Compass < rotation(PositionX, PositionY, CHECKPOINTS[checkpoint_count].center)-10)
+            if (rotation(PositionX, PositionY, CHECKPOINTS[checkpoint_count].center)- Compass < -10)
             {
-                WheelLeft=-1;
-                WheelRight=1;
-                LED_1= 0;
-                MyState= 0;
-                break;
+                if (abs(rotation(PositionX, PositionY, CHECKPOINTS[checkpoint_count].center)- Compass < 360 - abs(rotation(PositionX, PositionY, CHECKPOINTS[checkpoint_count].center)- Compass)))
+                {
+                    WheelLeft=1;
+                    WheelRight=-1;
+                    LED_1= 0;
+                    MyState= 0;
+                    break;
+                }
+                else
+                {
+                    WheelLeft=-1;
+                    WheelRight=1;
+                    LED_1= 0;
+                    MyState= 0;
+                    break;
+                }
+
             }
             else
             {
-                WheelLeft= 1;
-                WheelRight= -1;
-                LED_1= 0;
-                MyState= 0;
-                break;
+                if (abs(rotation(PositionX, PositionY, CHECKPOINTS[checkpoint_count].center)- Compass > 360 - abs(rotation(PositionX, PositionY, CHECKPOINTS[checkpoint_count].center)- Compass)))
+                {
+                    WheelLeft=1;
+                    WheelRight=-1;
+                    LED_1= 0;
+                    MyState= 0;
+                    break;
+                }
+                else
+                {
+                    WheelLeft=-1;
+                    WheelRight=1;
+                    LED_1= 0;
+                    MyState= 0;
+                    break;
+                }
             }
+
         case 3:
             WheelLeft=0;
             WheelRight=0;
@@ -843,22 +865,46 @@ void Game1()
             if(Duration == 1) {LoadedObjects = 0; checkpoint_count++; }
             break;
         case 4:
-            if (Compass < angle-10)
-            {
-                WheelLeft=-1;
-                WheelRight=1;
-                LED_1= 0;
-                MyState= 0;
+            if (constraint_zone(PositionX,PositionY) - Compass < -20) {
+
+
+                if (abs(constraint_zone(PositionX,PositionY) - Compass) < 360 - abs(constraint_zone(PositionX,PositionY) - Compass)) {
+                    WheelLeft = 1;
+                    WheelRight = -1;
+                    LED_1 = 0;
+                    MyState = 0;
+                    break;
+                } else {
+                    WheelLeft = -1;
+                    WheelRight = 1;
+                    LED_1 = 0;
+                    MyState = 0;
+                    break;
+                }
+            }
+            else if (constraint_zone(PositionX,PositionY) - Compass > 20){
+                if (abs(constraint_zone(PositionX,PositionY) - Compass) > 360 - abs(constraint_zone(PositionX,PositionY) - Compass)) {
+                    WheelLeft = 1;
+                    WheelRight = -1;
+                    LED_1 = 0;
+                    MyState = 0;
+                    break;
+                } else {
+                    WheelLeft = -1;
+                    WheelRight = 1;
+                    LED_1 = 0;
+                    MyState = 0;
+                    break;
+                }
+            }
+            else {
+                WheelLeft=2;
+                WheelRight=2;
+                LED_1=0;
+                MyState=0;
                 break;
             }
-            else
-            {
-                WheelLeft= 1;
-                WheelRight= -1;
-                LED_1= 0;
-                MyState= 0;
-                break;
-            }
+
         case 5:
             WheelLeft = 0;
             WheelRight = 0;
