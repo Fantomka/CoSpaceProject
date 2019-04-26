@@ -248,24 +248,21 @@ rotation(int x, int y, Coord dot)
 }
 bool initFlag = false;
 
-void init_values()
-{
-    /*_checkpoint(166, 45, 228, 105, 197, 75, 26);
-    _checkpoint(242, 113, 270, 138, 256, 125, 4);
-    _checkpoint(170, 197, 211, 232, 190, 214, 10);
-    _checkpoint(243, 113, 268, 137, 255, 125, 4);
-    _constraint(242, 166, 274, 175, 48);
-    _constraint(242, 141, 275, 150, 41);
-    */
+void init_values(){
+_checkpoint(227, 221, 276, 266, 252, 242, 15);
+_checkpoint(60, 147, 99, 189, 79, 168, 11);
+_checkpoint(130, 79, 174, 110, 152, 94, 9);
+_checkpoint(239, 111, 269, 137, 254, 124, 5);
 
-    _checkpoint(126, 208, 190, 261, 158, 234, 23);
-    _checkpoint(243, 111, 269, 138, 256, 124, 4);
-    _checkpoint(81, 59, 81, 59, 81, 59, 0);
+_constraint(185, 40, 221, 71, 322);
 
-    _constraint(178, 47, 232, 78, 64);
-    _constraint(181, 130, 226, 166, 271);
-    _constraint(241, 141, 252, 175, 181);
+
+
 }
+
+
+
+
 
 bool timeFlag = false;
 int ourTime = 1500;
@@ -281,7 +278,7 @@ void init()
     if (SuperObj_X != 0 || SuperObj_Y !=0)
     {
         SuperObjectFlag = true;
-        SuperCoord.x = SuperObj_X;
+        SuperCoord.x = SuperObj_X +3;
         SuperCoord.y = SuperObj_Y;
 
     }
@@ -626,7 +623,7 @@ void Game0() {
             WheelRight = 0;
             LED_1 = 0;
             MyState = 0;
-            Teleport = 3;
+            Teleport = 4;
             LoadedObjects = 0;
             WheelLeft = 0;
             WheelRight = 0;
@@ -811,8 +808,8 @@ void Game1()
     switch(CurAction)
     {
         case 1:
-            WheelLeft=2;
-            WheelRight=2;
+            WheelLeft=3;
+            WheelRight=3;
             LED_1=0;
             MyState=0;
             break;
@@ -898,8 +895,8 @@ void Game1()
                 }
             }
             else {
-                WheelLeft=2;
-                WheelRight=2;
+                WheelLeft=3;
+                WheelRight=3;
                 LED_1=0;
                 MyState=0;
                 break;
@@ -958,3 +955,7 @@ DLL_EXPORT void OnTimer()
     }
 }
 
+main()
+{
+    printf("hello");
+}
