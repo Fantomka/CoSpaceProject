@@ -21,7 +21,6 @@ v2.1
 import tkinter as tk
 import math as m
 from PIL import Image, ImageTk
-from pprint import pprint
 
 # используются константы для удобочитаемости
 NEW_CHECKPOINT = 1
@@ -56,33 +55,18 @@ class CustomMenu(tk.Tk):
         self.canvas.bind("<Motion>", self.on_move)
         self.canvas.bind("<Button-3>", self.set_angle)
 
-        # Объявление счетчиков зон
-        self.rect_blue = None
-        self.rect_red = None
-        self.rect_constr = None
-
-        # Объявление счетчиков векторов
-        self.vector_checkp_blue = None
-        self.vector_checkp_red = None
+        self.rect = None
         self.vector_constr = None
-
-        # Координаты нажатия лкм
+        self.vector_checkp = None
         self.start_x = None
         self.start_y = None
-
-        # Списки зон (их координаты и индивидуальные параметры)
-        self.checkpoints_blue = []
-        self.checkpoints_red = []
+        self.checkpoints = []
         self.constraints = []
 
         self._draw_image()
 
         self.panel = tk.Frame(self, bg="#FFFFFF")                        # фрейм панели управления
         self.panel.place(width=131, height=540, relx=0.845)
-
-        self.team_press = tk.StringVar()
-        self.team_press.set('BLUE')                                      # Список цветов команд
-        self.team_btn = tk.OptionMenu(self.panel, self.team_press, 'BLUE', 'RED')
 
         self.coords = tk.Label(self.panel, text=f'x - 0, y - 0')         # координаты курсора
 
@@ -98,7 +82,6 @@ class CustomMenu(tk.Tk):
         self.export_btn.bind("<Button-1>", self.export_data)
 
         # Упаковка кнопок
-        self.team_btn.pack(side="top", fill="both")
         self.coords.pack(side="top", fill="both")
         self.rb1.pack(side="top", fill="both")
         self.rb2.pack(side="top", fill="both")
@@ -116,33 +99,18 @@ class CustomMenu(tk.Tk):
         self.canvas.create_image(0, 0, anchor="nw", image=self.tk_im)
 
     def on_button_press(self, event):
-        """
-        Сохраняет координаты нажатия ЛКМ и рисует прямоугльники
-        синий цвет - синяя команда
-        красный цвет - красная комана
-        фиолетовый цвет - зона ограничения
-        """
+        """Сохраняет координаты нажатия ЛКМ и рисует прямоугльники"""
         self.start_x = event.x
         self.start_y = event.y
         if self.rb_press.get() == NEW_CHECKPOINT:
-            if self.team_press.get() in "BLUE":
-                self.rect_blue = self.canvas.create_rectangle(0, 0, 1, 1, outline='blue')
-            elif self.team_press.get() in "RED":
-                self.rect_red = self.canvas.create_rectangle(0, 0, 1, 1, outline='red')
+            self.rect = self.canvas.create_rectangle(0, 0, 1, 1, outline='green', tag='cp')
         elif self.rb_press.get() == CONSTRAINT_NEW:
-            self.rect_constr = self.canvas.create_rectangle(0, 0, 1, 1, outline='purple')
+            self.rect = self.canvas.create_rectangle(0, 0, 1, 1, outline='red', tag='ct')
 
     def on_move_press(self, event):
         """изменение размеров прямоугольника в соответствии с движением курсора"""
         self.on_move(event)
-        if self.rb_press.get() in (NEW_CHECKPOINT, REDRAW_CHECKPOINT):
-            if self.team_press.get() in "BLUE":
-                self.canvas.coords(self.rect_blue, self.start_x, self.start_y, event.x, event.y)
-            if self.team_press.get() in "RED":
-                self.canvas.coords(self.rect_red, self.start_x, self.start_y, event.x, event.y)
-
-        elif self.rb_press.get() in (CONSTRAINT_NEW, REDRAW_CONSTRAINT):
-            self.canvas.coords(self.rect_constr, self.start_x, self.start_y, event.x, event.y)
+        self.canvas.coords(self.rect, self.start_x, self.start_y, event.x, event.y)
 
     def on_button_release(self, event):
         """
@@ -169,50 +137,26 @@ class CustomMenu(tk.Tk):
         time_set = int((x_right - x_left) * (y_right - y_left) * TIME_SET_COEFFICIENT)
 
         if self.rb_press.get() == NEW_CHECKPOINT:    # соохраняем координаты и рисуем вектор между чекпоинтами
-            if self.team_press.get() in "BLUE":
-                self.checkpoints_blue.append([x_left, y_left, x_right, y_right, center_x, center_y, time_set])
-            elif self.team_press.get() in "RED":
-                self.checkpoints_red.append([x_left, y_left, x_right, y_right, center_x, center_y, time_set])
-            if self.team_press.get() in "BLUE" and len(self.checkpoints_blue) > 1:
-                # Рисуем вектор  для команды синих от прошлой зоны до новой
-                self.vector_checkp_blue = self.canvas.create_line(self.checkpoints_blue[-2][4] * 2 - 1,     \
-                                                             (270 - self.checkpoints_blue[-2][5]) * 2, \
+            self.checkpoints.append([x_left, y_left, x_right, y_right, center_x, center_y, time_set])
+            if len(self.checkpoints) > 1:
+                self.vector_checkp = self.canvas.create_line(self.checkpoints[-2][4] * 2 - 1,     \
+                                                             (270 - self.checkpoints[-2][5]) * 2, \
                                                              center_x * 2 - 1,                    \
                                                              (270 - center_y) * 2,                \
                                                              arrow=tk.LAST,                       \
-                                                             fill='blue')
+                                                             fill='green')
 
-            elif self.team_press.get() in "RED" and len(self.checkpoints_red) > 1:
-                # Рисуем вектор  для команды красных от прошлой зоны до новой
-                self.vector_checkp_red = self.canvas.create_line(self.checkpoints_red[-2][4]*2-1, \
-                                                             (270-self.checkpoints_red[-2][5])*2, \
+        elif self.rb_press.get() == REDRAW_CHECKPOINT:       # перезаписываем список
+            self.checkpoints.pop()                           # и перерисовываем вектор
+            self.checkpoints.append([x_left, y_left, x_right, y_right, center_x, center_y, time_set])
+            if len(self.checkpoints) > 1:
+                self.canvas.delete(self.vector_checkp)
+                self.vector_checkp = self.canvas.create_line(self.checkpoints[-2][4] * 2 - 1,     \
+                                                             (270 - self.checkpoints[-2][5]) * 2, \
                                                              center_x * 2 - 1,                    \
                                                              (270 - center_y) * 2,                \
                                                              arrow=tk.LAST,                       \
-                                                             fill='red')
-        elif self.rb_press.get() == REDRAW_CHECKPOINT:       # Перезаписываем список
-            if self.team_press.get() in "BLUE":              # синей команды и
-                self.checkpoints_blue.pop()                  # и перерисовываем вектор
-                self.checkpoints_blue.append([x_left, y_left, x_right, y_right, center_x, center_y, time_set])
-                if len(self.checkpoints_blue) > 1:
-                    self.canvas.delete(self.vector_checkp_blue)
-                    self.vector_checkp_blue = self.canvas.create_line(self.checkpoints_blue[-2][4]*2-1,\
-                                                              (270-self.checkpoints_blue[-2][5])*2,    \
-                                                              center_x * 2 - 1,                        \
-                                                              (270 - center_y) * 2,                    \
-                                                              arrow=tk.LAST,                           \
-                                                              fill='blue')
-            if self.team_press.get() in "RED":
-                self.checkpoints_red.pop()                           # и перерисовываем вектор
-                self.checkpoints_red.append([x_left, y_left, x_right, y_right, center_x, center_y, time_set])
-                if len(self.checkpoints_red) > 1:
-                    self.canvas.delete(self.vector_checkp_red)
-                    self.vector_checkp_red = self.canvas.create_line(self.checkpoints_red[-2][4]*2-1,\
-                                                              (270-self.checkpoints_red[-2][5])*2,   \
-                                                              center_x * 2 - 1,                      \
-                                                              (270 - center_y) * 2,                  \
-                                                              arrow=tk.LAST,                         \
-                                                              fill='red')
+                                                             fill='green')
 
         elif self.rb_press.get() == CONSTRAINT_NEW:  # (прорисовка вектора происходит в set_angle)
             self.constraints.append([x_left, y_left, x_right, y_right, center_x, center_y])
@@ -220,9 +164,7 @@ class CustomMenu(tk.Tk):
             self.constraints.pop()
             self.constraints.append([x_left, y_left, x_right, y_right, center_x, center_y])
             self.canvas.delete(self.vector_constr)
-        pprint(self.checkpoints_blue)
-        pprint(self.checkpoints_red)
-        pprint(self.constraints)
+        print(self.checkpoints, self.constraints)
 
     def on_move(self, event):
         """
@@ -268,7 +210,7 @@ class CustomMenu(tk.Tk):
         y_begin = (270 - center_y) * 2       # Выводим координаты
         x_end = dot_x * 2 + 1              # для вектора
         y_end = (270 - dot_y) * 2
-        self.vector_constr = self.canvas.create_line(x_begin, y_begin, x_end, y_end, arrow=tk.LAST, fill='purple')
+        self.vector_constr = self.canvas.create_line(x_begin, y_begin, x_end, y_end, arrow=tk.LAST, fill='red')
 
     def export_data(self, event):
         """
@@ -278,17 +220,8 @@ class CustomMenu(tk.Tk):
         """
         #  Собираем и форматируем данные на экспорт в прошивку
         export_buffer = []
-        for stroke in self.checkpoints_blue:
-            temp = '_checkpoint_blue('
-            for i, elem in enumerate(stroke):
-                if i != len(stroke) - 1:
-                    temp += str(elem) + ', '
-                else:
-                    temp += str(elem) + ');\n'
-            export_buffer.append(temp)
-        export_buffer.append('\n')
-        for stroke in self.checkpoints_red:
-            temp = '_checkpoint_red('
+        for stroke in self.checkpoints:
+            temp = '_checkpoint('
             for i, elem in enumerate(stroke):
                 if i != len(stroke) - 1:
                     temp += str(elem) + ', '
@@ -315,7 +248,6 @@ class CustomMenu(tk.Tk):
                     break
             file.seek(0)                                # Обнуляем указатель файла
             file.writelines(contents)                   # Переписываем фал с вставленными данными
-        print('export done')
 
 
 if __name__ == '__main__':
