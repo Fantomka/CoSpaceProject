@@ -117,7 +117,7 @@ class CustomMenu(tk.Tk):
         при отжатии клавиши лкм происходит просчет и
         выгрузка координат созданной зоны, а также дополнительных
         индвивидуальных данных в список self.checkpoints и self.constraints
-        После этого рисуются вектора
+        и после этого рисуются вектора
         :param event: отжатие лкм
         """
         if self.start_x < event.x:
@@ -125,12 +125,12 @@ class CustomMenu(tk.Tk):
             x_right = event.x // 2 + 1              # Левой нижней
         else:                                       # И правой верхней точки
             x_left = event.x // 2 + 1
-            x_right = self.start_x // 2 + 1         # Так же идет пересчет координат
-        if self.start_y > event.y:                  # Необходимо из-за
-            y_left = 270 - self.start_y // 2        # разных систем координат
-            y_right = 270 - event.y // 2
-        else:
-            y_left = 270 - event.y // 2
+            x_right = self.start_x // 2 + 1
+        if self.start_y > event.y:                  # Знак другой из-за разных точек отсчета
+            y_left = 270 - self.start_y // 2
+            y_right = 270 - event.y // 2            # Так же идет перепросчет координат
+        else:                                       # Необходимо из-за
+            y_left = 270 - event.y // 2             # разных систем координат
             y_right = 270 - self.start_y // 2
         center_x = (x_right + x_left) // 2
         center_y = (y_left + y_right) // 2
