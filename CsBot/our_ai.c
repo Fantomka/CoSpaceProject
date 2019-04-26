@@ -41,7 +41,7 @@ Coord new_Coord(int x, int y){
     return v;
 }
 
-// контрольные точки, по которым двигается робот
+// Контрольные точки, по которым двигается робот
 typedef struct{
     Coord p1;
     Coord p2;
@@ -67,7 +67,7 @@ void _checkpoint(int x1, int y1, int x2, int y2, int center_x, int center_y, int
     CHECKPOINTS[checkpoint_count++] = new_Checkpoint(new_Coord(x1, y1), new_Coord(x2, y2), new_Coord(center_x, center_y), time_set);
 }
 
-// прямоугольник ограничения движения (изменение пути)
+// Прямоугольник ограничения движения (изменение пути)
 typedef struct{
     Coord p1;
     Coord p2;
@@ -153,7 +153,7 @@ DLL_EXPORT char* GetDebugInfo()
 }
  
 DLL_EXPORT char* GetTeamName(){
-     return " ";
+     return "MFBMSTU";
 }
 
 DLL_EXPORT int GetCurAction()
