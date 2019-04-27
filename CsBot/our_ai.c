@@ -637,7 +637,7 @@ void Game0() {
             WheelRight = 0;
             LED_1 = 0;
             MyState = 0;
-            Teleport = 4;
+            Teleport = 1;
             LoadedObjects = 0;
             WheelLeft = 0;
             WheelRight = 0;
