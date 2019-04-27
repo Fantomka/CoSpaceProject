@@ -20,8 +20,8 @@ v2.0
 
 import tkinter as tk
 import math as m
-from PIL import Image, ImageTk
 from pprint import pprint
+from PIL import Image, ImageTk
 
 # используются константы для удобочитаемости
 NEW_CHECKPOINT = 1
